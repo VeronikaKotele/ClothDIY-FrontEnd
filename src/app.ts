@@ -1,30 +1,35 @@
 import "@babylonjs/core/Debug/debugLayer.js";
-import "@babylonjs/inspector";
-import "@babylonjs/loaders/glTF/index.js";
+import "@babylonjs/loaders/OBJ/index.js";
 import {
   Engine,
   Scene,
   ArcRotateCamera,
   Vector3,
   HemisphericLight,
-  Mesh,
   MeshBuilder,
 } from "@babylonjs/core";
+import { AppendSceneAsync } from "@babylonjs/core/Loading/sceneLoader.js";
 
 class App {
+  private canvas: HTMLCanvasElement;
+  private engine: Engine;
+  private inspectorLoaded = false;
+
   constructor() {
     // create the canvas html element and attach it to the webpage
-    var canvas = document.createElement("canvas");
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.id = "gameCanvas";
-    document.body.appendChild(canvas);
+    this.canvas = document.createElement("canvas");
+    this.canvas.style.width = "100%";
+    this.canvas.style.height = "100%";
+    this.canvas.id = "gameCanvas";
+    document.body.appendChild(this.canvas);
 
-    // initialize babylon scene and engine
-    var engine = new Engine(canvas, true);
-    var scene = new Scene(engine);
+    this.engine = new Engine(this.canvas, true);
+  }
 
-    var camera: ArcRotateCamera = new ArcRotateCamera(
+  private async createScene(): Promise<Scene> {
+    const scene = new Scene(this.engine);
+
+    const camera = new ArcRotateCamera(
       "Camera",
       Math.PI / 2,
       Math.PI / 2,
@@ -32,20 +37,22 @@ class App {
       Vector3.Zero(),
       scene,
     );
-    camera.attachControl(canvas, true);
-    var light1: HemisphericLight = new HemisphericLight(
-      "light1",
-      new Vector3(1, 1, 0),
-      scene,
-    );
-    var sphere: Mesh = MeshBuilder.CreateSphere(
-      "sphere",
-      { diameter: 1 },
-      scene,
-    );
+    camera.attachControl(this.canvas, true);
+
+    new HemisphericLight("light1", new Vector3(1, 1, 0), scene);
+    MeshBuilder.CreateSphere("sphere", { diameter: 1 }, scene);
+
+    // Load an OBJ model served by webpack dev server from /3dModels.
+    await AppendSceneAsync("/3dModels/body.obj", scene);
+
+    return scene;
+  }
+
+  async init(): Promise<void> {
+    const scene = await this.createScene();
 
     // hide/show the Inspector
-    window.addEventListener("keydown", (ev) => {
+    window.addEventListener("keydown", async (ev) => {
       // Shift+Ctrl+Alt+I
       if (
         ev.shiftKey &&
@@ -56,15 +63,27 @@ class App {
         if (scene.debugLayer.isVisible()) {
           scene.debugLayer.hide();
         } else {
+          if (!this.inspectorLoaded) {
+            await import("@babylonjs/inspector");
+            this.inspectorLoaded = true;
+          }
           scene.debugLayer.show();
         }
       }
     });
 
+    window.addEventListener("resize", () => {
+      this.engine.resize();
+    });
+
     // run the main render loop
-    engine.runRenderLoop(() => {
+    this.engine.runRenderLoop(() => {
       scene.render();
     });
   }
 }
-new App();
+
+const app = new App();
+app.init().catch((error) => {
+  console.error("Failed to initialize Babylon app:", error);
+});
