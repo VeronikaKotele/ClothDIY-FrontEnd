@@ -1,0 +1,25 @@
+{
+  "name": "clothdiy-frontent",
+  "version": "1.0.0",
+  "description": "Front-end part of web application for garment design and manufacturing planning for non-professionals",
+  "keywords": [
+    "ClothDesign",
+    "GarmentPreview",
+    "3dVisualization"
+  ],
+  "homepage": "https://github.com/VeronikaKotele/ClothDIY-FrontEnd#readme",
+  "bugs": {
+    "url": "https://github.com/VeronikaKotele/ClothDIY-FrontEnd/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VeronikaKotele/ClothDIY-FrontEnd.git"
+  },
+  "license": "ISC",
+  "author": "Veronika Kotelevska",
+  "type": "module",
+  "main": "src/app.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
