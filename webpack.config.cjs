@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const appDirectory = fs.realpathSync(process.cwd());
 
 module.exports = {
@@ -27,15 +28,6 @@ module.exports = {
         devMiddleware: {
             publicPath: "/",
         }
-    },
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                use: "ts-loader",
-                exclude: /node_modules/,
-            },
-        ],
     },
     plugins: [
         new HtmlWebpackPlugin({
