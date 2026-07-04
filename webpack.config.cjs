@@ -25,7 +25,7 @@ module.exports = {
     port: 8080, //port that we're using for local host (localhost:8080)
     static: [
       {
-        directory: path.resolve(appDirectory, "public"),
+        directory: path.resolve(appDirectory),
         publicPath: "/",
       },
       {
@@ -41,7 +41,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       inject: true,
-      template: path.resolve(appDirectory, "public/index.html"),
+      template: path.resolve(appDirectory, "index.html"),
     }),
   ],
   mode: "development",
