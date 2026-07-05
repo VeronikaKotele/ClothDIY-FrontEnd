@@ -12,7 +12,7 @@ module.exports = (_, argv) => {
   output: {
     filename: "js/app.js", //name for the javascript file that is created/compiled in memory
     path: path.resolve(appDirectory, "dist"),
-    publicPath: isProduction ? "./" : "/",
+    publicPath: isProduction ? "/ClothDIY-FrontEnd/" : "/",
     clean: true,
   },
   resolve: {
