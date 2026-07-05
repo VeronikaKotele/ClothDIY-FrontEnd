@@ -15,6 +15,7 @@ const LOG_TAG = "[BabylonApp]";
 console.info(`${LOG_TAG} Built-in loaders registered.`);
 
 class BabylonApp {
+  private static globalErrorHooksRegistered = false;
   private canvas: HTMLCanvasElement;
   private engine: Engine;
   private scene: Scene | null = null;
@@ -27,6 +28,7 @@ class BabylonApp {
       baseURI: document.baseURI,
       canvasSize: `${canvas.clientWidth}x${canvas.clientHeight}`,
     });
+    this.registerGlobalErrorHooks();
     if (targetSceneHight !== undefined) {
       this.targetSceneHight = targetSceneHight;
     }
@@ -44,17 +46,58 @@ class BabylonApp {
 
     this.createCamera(scene);
     this.createLight(scene);
-    this.loadModel(scene)
-      .then(() => {
-        console.info(`${LOG_TAG} Model load completed.`);
-      })
-      .catch((error) => {
-        console.error(`${LOG_TAG} Model load failed.`, error);
-      });
     this.scene = scene;
     console.info(`${LOG_TAG} Scene created.`);
     
     return scene;
+  }
+
+  private startModelLoad(scene: Scene): void {
+    const loadStart = performance.now();
+    const watchdogMs = 10000;
+    const watchdog = window.setTimeout(() => {
+      console.error(`${LOG_TAG} Model load watchdog timeout after ${watchdogMs}ms.`, {
+        hint: "Check Network for missing js chunks and 3dModels/body.obj",
+        baseURI: document.baseURI,
+      });
+    }, watchdogMs);
+
+    // Defer model loading until after first paint so the page remains interactive.
+    requestAnimationFrame(() => {
+      void this.loadModel(scene)
+        .then(() => {
+          window.clearTimeout(watchdog);
+          console.info(`${LOG_TAG} Model load completed.`, {
+            durationMs: Math.round(performance.now() - loadStart),
+          });
+        })
+        .catch((error) => {
+          window.clearTimeout(watchdog);
+          console.error(`${LOG_TAG} Model load failed.`, error);
+        });
+    });
+  }
+
+  private registerGlobalErrorHooks(): void {
+    if (BabylonApp.globalErrorHooksRegistered) {
+      return;
+    }
+
+    BabylonApp.globalErrorHooksRegistered = true;
+
+    window.addEventListener("error", (event) => {
+      console.error(`${LOG_TAG} window error event.`, {
+        message: event.message,
+        fileName: event.filename,
+        line: event.lineno,
+        column: event.colno,
+        error: event.error,
+      });
+    });
+
+    window.addEventListener("unhandledrejection", (event) => {
+      console.error(`${LOG_TAG} unhandled promise rejection.`, event.reason);
+    });
   }
 
   private async createCamera(scene: Scene) {
@@ -178,6 +221,8 @@ class BabylonApp {
       scene.render();
     });
     console.info(`${LOG_TAG} render loop started.`);
+
+    this.startModelLoad(scene);
   }
 }
 
