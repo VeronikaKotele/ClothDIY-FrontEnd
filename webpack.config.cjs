@@ -54,6 +54,7 @@ module.exports = (_, argv) => {
     new HtmlWebpackPlugin({
       inject: true,
       template: path.resolve(appDirectory, "index.html"),
+      cache: false,
     }),
     new CopyWebpackPlugin({
       patterns: [
