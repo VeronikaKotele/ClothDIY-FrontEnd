@@ -1,0 +1,109 @@
+.bodyBuilderContainer .inputsContainer {
+	width: min(520px, 44vw);
+	height: calc(100vh - 60px);
+	overflow-y: auto;
+	padding: 20px 22px;
+	border-radius: 14px;
+	box-sizing: border-box;
+}
+
+.controlGroup {
+	margin-bottom: 16px;
+}
+
+.controlGroup label {
+	display: inline-block;
+	margin-right: 10px;
+	color: #f4f8ff;
+	font-weight: 600;
+}
+
+#bodyTypeSelect {
+	min-width: 140px;
+	height: 34px;
+	border: 1px solid #c7d5f1;
+	border-radius: 8px;
+	padding: 0 10px;
+	box-sizing: border-box;
+}
+
+.body-parameters-input-form {
+	display: grid;
+	grid-template-columns: minmax(220px, 1fr) 140px;
+	column-gap: 14px;
+	row-gap: 10px;
+	align-items: center;
+}
+
+.body-parameters-input-form label {
+	justify-self: start;
+	color: #f4f8ff;
+	font-size: 14px;
+	line-height: 1.25;
+	font-weight: 600;
+}
+
+.body-parameters-input-form input {
+	justify-self: end;
+	width: 100%;
+	max-width: 140px;
+	height: 34px;
+	padding: 0 10px;
+	border: 1px solid #c7d5f1;
+	border-radius: 8px;
+	box-sizing: border-box;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.search-form__button {
+	grid-column: 1 / -1;
+	margin-top: 8px;
+	height: 38px;
+	border: none;
+	border-radius: 10px;
+	background-color: #1d2f57;
+	color: #fff;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.search-form__button:hover {
+	background-color: #132447;
+}
+
+.search-form__button:focus-visible,
+.body-parameters-input-form input:focus-visible,
+#bodyTypeSelect:focus-visible {
+	outline: 2px solid #f3ca57;
+	outline-offset: 2px;
+}
+
+@media (max-width: 980px) {
+	.bodyBuilderContainer {
+		flex-direction: column;
+	}
+
+	.bodyBuilderContainer .canvas3DContainer {
+		width: 100%;
+		height: 45vh;
+	}
+
+	.bodyBuilderContainer .inputsContainer {
+		width: auto;
+		height: calc(55vh - 30px);
+		margin: 15px;
+	}
+}
+
+@media (max-width: 560px) {
+	.body-parameters-input-form {
+		grid-template-columns: 1fr;
+	}
+
+	.body-parameters-input-form label,
+	.body-parameters-input-form input {
+		justify-self: stretch;
+		max-width: none;
+	}
+}

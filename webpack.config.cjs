@@ -10,6 +10,11 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    extensionAlias: {
+      ".js": [".js", ".ts"],
+      ".mjs": [".mjs", ".mts"],
+      ".cjs": [".cjs", ".cts"],
+    },
   },
   module: {
     rules: [

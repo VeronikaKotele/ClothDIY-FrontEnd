@@ -1,8 +1,8 @@
 # 3ds Max Wavefront OBJ Exporter v0.99 - (c)2007 guruware
-# ╢╢╫╗╣днд╪Ч:09.02.2023 03:28:28
+# О©╫О©╫О©╫О©╫О©╫О©╫О©╫д╪О©╫:09.02.2023 03:28:28
 
 #
-# object Box001
+# object BodyRight
 #
 
 v  15.8421 225.2805 -5.0171
@@ -1857,8 +1857,8 @@ vt 0.6320 1.0000 0.0000
 vt 0.3001 1.0000 0.0000
 # 432 texture coords
 
-o Box001
-g Box001
+o BodyRightObject
+g BodyRight
 s 1
 f 1/1/1 2/2/2 3/3/3 
 f 4/4/4 5/5/5 6/6/6 
@@ -2815,7 +2815,7 @@ f 627/347/627 626/346/626 657/366/657
 # 502 polygons - 336 triangles
 
 #
-# object Box002
+# object BodyLeft
 #
 
 v  -15.8421 225.2805 -5.0171
@@ -4670,8 +4670,8 @@ vt 0.6320 1.0000 0.0000
 vt 0.3001 1.0000 0.0000
 # 432 texture coords
 
-o Box002
-g Box002
+o BodyLeftObject
+g BodyLeft
 s 1
 f 710/435/710 709/434/709 708/433/708 
 f 713/438/713 712/437/712 711/436/711 
