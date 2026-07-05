@@ -1,12 +1,19 @@
 const path = require("path");
 const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const appDirectory = fs.realpathSync(process.cwd());
 
-module.exports = {
+module.exports = (_, argv) => {
+  const isProduction = argv.mode === "production";
+
+  return {
   entry: path.resolve(appDirectory, "src/app.ts"), //path to the main .ts file
   output: {
     filename: "js/app.js", //name for the javascript file that is created/compiled in memory
+    path: path.resolve(appDirectory, "dist"),
+    publicPath: isProduction ? "./" : "/",
+    clean: true,
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
@@ -48,6 +55,14 @@ module.exports = {
       inject: true,
       template: path.resolve(appDirectory, "index.html"),
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.resolve(appDirectory, "3dModels"), to: "3dModels" },
+        { from: path.resolve(appDirectory, "public"), to: "public" },
+        { from: path.resolve(appDirectory, "src/css"), to: "src/css" },
+      ],
+    }),
   ],
-  mode: "development",
+  mode: isProduction ? "production" : "development",
+};
 };

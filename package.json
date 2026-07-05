@@ -7,7 +7,7 @@
     "GarmentPreview",
     "3dVisualization"
   ],
-  "homepage": "https://github.com/VeronikaKotele/ClothDIY-FrontEnd#readme",
+  "homepage": "https://veronikakotele.github.io/ClothDIY-FrontEnd/",
   "bugs": {
     "url": "https://github.com/VeronikaKotele/ClothDIY-FrontEnd/issues"
   },
@@ -20,12 +20,13 @@
   "type": "module",
   "main": "src/app.ts",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack-dev-server --port 8080"
+    "build": "webpack --mode production",
+    "start": "webpack serve --mode development --port 8080"
   },
   "devDependencies": {
     "@babylonjs/core": "^9.3.0",
     "@babylonjs/inspector": "^9.3.0",
+    "copy-webpack-plugin": "^14.0.0",
     "html-webpack-plugin": "^5.6.6",
     "ts-loader": "^9.5.7",
     "typescript": "^6.0.3",

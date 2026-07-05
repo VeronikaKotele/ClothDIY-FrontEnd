@@ -85,7 +85,7 @@ class BabylonApp {
   }
 
   private async loadBodyModel(scene: Scene) : Promise<BABYLON.TransformNode> {
-    const bodyMeshes = await ImportMeshAsync("/3dModels/body.obj", scene, 
+    const bodyMeshes = await ImportMeshAsync("./3dModels/body.obj", scene, 
         { meshNames: ["BodyLeft"]}); // "BodyLeft" is a half of the body model (left for our view when looking on face).
     if (bodyMeshes.meshes.length != 1) {
       console.error("Loaded meshes:", bodyMeshes.meshes.map(mesh => mesh.name));
