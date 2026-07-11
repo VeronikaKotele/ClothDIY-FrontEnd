@@ -1,18 +1,18 @@
-import { registerBuiltInLoaders } from "@babylonjs/loaders/dynamic.js";
 import {
+  AbstractMesh,
+  AxesViewer,
   Engine,
   Scene,
   Vector3,
   HemisphericLight,
   ImportMeshAsync,
+  Quaternion,
+  TransformNode,
 } from "@babylonjs/core";
 import { Camera } from "./Camera.js";
 
-import * as BABYLON from "@babylonjs/core";
-
-registerBuiltInLoaders();
 const LOG_TAG = "[BabylonApp]";
-console.info(`${LOG_TAG} Built-in loaders registered.`);
+console.info(`${LOG_TAG} App bootstrap started.`);
 
 class BabylonApp {
   private static globalErrorHooksRegistered = false;
@@ -42,7 +42,7 @@ class BabylonApp {
   private async createScene(): Promise<Scene> {
     console.info(`${LOG_TAG} createScene started.`);
     const scene = new Scene(this.engine);
-    const axes = new BABYLON.AxesViewer(scene);
+    const axes = new AxesViewer(scene);
 
     this.createCamera(scene);
     this.createLight(scene);
@@ -142,11 +142,10 @@ class BabylonApp {
     });
   }
 
-  private async loadBodyModel(scene: Scene) : Promise<BABYLON.TransformNode> {
+  private async loadBodyModel(scene: Scene) : Promise<TransformNode> {
     await this.ensureObjLoader();
 
     const modelUrl = new URL("3dModels/body.obj", document.baseURI).toString();
-    await this.probeModelUrl(modelUrl);
 
     console.info(`${LOG_TAG} ImportMeshAsync request.`, { modelUrl });
     const bodyMeshes = await ImportMeshAsync(modelUrl, scene,
@@ -160,7 +159,7 @@ class BabylonApp {
       throw new Error("Expected to load exactly one mesh for the body model, got " + bodyMeshes.meshes.length);
     }
     const bodyLeft = bodyMeshes.meshes[0];
-    const root = new BABYLON.TransformNode("bodyRoot", scene);
+    const root = new TransformNode("bodyRoot", scene);
     bodyLeft.setParent(root);
 
     // For better performance, we clone the half instead of loading.
@@ -173,7 +172,7 @@ class BabylonApp {
     bodyRight.scaling.x *= -1;
 
     // Meshes are loaded with their original orientation (face to +z). Rotate 180 around Y axis.
-    root.rotationQuaternion = BABYLON.Quaternion.FromEulerAngles(0, Math.PI, 0);
+    root.rotationQuaternion = Quaternion.FromEulerAngles(0, Math.PI, 0);
 
     return root;
   }
@@ -189,24 +188,7 @@ class BabylonApp {
     }
   }
 
-  private async probeModelUrl(modelUrl: string): Promise<void> {
-    console.info(`${LOG_TAG} Probing model URL with HEAD...`, { modelUrl });
-    try {
-      const response = await fetch(modelUrl, { method: "HEAD" });
-      if (!response.ok) {
-        throw new Error(`HEAD ${modelUrl} -> ${response.status} ${response.statusText}`);
-      }
-      console.info(`${LOG_TAG} Model URL probe succeeded.`, {
-        status: response.status,
-        contentType: response.headers.get("content-type"),
-      });
-    } catch (error) {
-      console.error(`${LOG_TAG} Model URL probe failed.`, error);
-      throw error;
-    }
-  }
-
-  private getMeshesBoundingBox(meshes: BABYLON.AbstractMesh[]): { min: Vector3; max: Vector3 } {
+  private getMeshesBoundingBox(meshes: AbstractMesh[]): { min: Vector3; max: Vector3 } {
     const boundsMin = new Vector3(
       Number.POSITIVE_INFINITY,
       Number.POSITIVE_INFINITY,
