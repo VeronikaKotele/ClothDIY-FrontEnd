@@ -143,7 +143,11 @@ class BabylonApp {
   }
 
   private async loadBodyModel(scene: Scene) : Promise<BABYLON.TransformNode> {
+    await this.ensureObjLoader();
+
     const modelUrl = new URL("3dModels/body.obj", document.baseURI).toString();
+    await this.probeModelUrl(modelUrl);
+
     console.info(`${LOG_TAG} ImportMeshAsync request.`, { modelUrl });
     const bodyMeshes = await ImportMeshAsync(modelUrl, scene,
         { meshNames: ["BodyLeft"]}); // "BodyLeft" is a half of the body model (left for our view when looking on face).
@@ -172,6 +176,34 @@ class BabylonApp {
     root.rotationQuaternion = BABYLON.Quaternion.FromEulerAngles(0, Math.PI, 0);
 
     return root;
+  }
+
+  private async ensureObjLoader(): Promise<void> {
+    console.info(`${LOG_TAG} Loading OBJ loader chunk...`);
+    try {
+      await import("@babylonjs/loaders/OBJ/index.js");
+      console.info(`${LOG_TAG} OBJ loader chunk loaded.`);
+    } catch (error) {
+      console.error(`${LOG_TAG} Failed to load OBJ loader chunk.`, error);
+      throw error;
+    }
+  }
+
+  private async probeModelUrl(modelUrl: string): Promise<void> {
+    console.info(`${LOG_TAG} Probing model URL with HEAD...`, { modelUrl });
+    try {
+      const response = await fetch(modelUrl, { method: "HEAD" });
+      if (!response.ok) {
+        throw new Error(`HEAD ${modelUrl} -> ${response.status} ${response.statusText}`);
+      }
+      console.info(`${LOG_TAG} Model URL probe succeeded.`, {
+        status: response.status,
+        contentType: response.headers.get("content-type"),
+      });
+    } catch (error) {
+      console.error(`${LOG_TAG} Model URL probe failed.`, error);
+      throw error;
+    }
   }
 
   private getMeshesBoundingBox(meshes: BABYLON.AbstractMesh[]): { min: Vector3; max: Vector3 } {
