@@ -142,33 +142,28 @@ class BabylonApp {
   }
 
   private async loadBodyModel(scene: Scene) : Promise<TransformNode> {
-    await this.ensureObjLoader();
+    await this.ensureGltfLoader();
 
-    const modelUrl = new URL("3dModels/body.obj", document.baseURI).toString();
+    const modelUrl = new URL("3dModels/body-compressed.glb", document.baseURI).toString();
 
     console.info(`${LOG_TAG} ImportMeshAsync request.`, { modelUrl });
-    const bodyMeshes = await ImportMeshAsync(modelUrl, scene,
-        { meshNames: ["BodyRight"]}); // "BodyRight" is a half of the body model (left for our view when looking on face).
+    const bodyMeshes = await ImportMeshAsync(modelUrl, scene);
     console.info(`${LOG_TAG} ImportMeshAsync response.`, {
       meshCount: bodyMeshes.meshes.length,
       meshNames: bodyMeshes.meshes.map((mesh) => mesh.name),
     });
-    if (bodyMeshes.meshes.length != 1) {
+    if (bodyMeshes.meshes.length === 0) {
       console.error("Loaded meshes:", bodyMeshes.meshes.map(mesh => mesh.name));
-      throw new Error("Expected to load exactly one mesh for the body model, got " + bodyMeshes.meshes.length);
+      throw new Error("Expected at least one mesh for the body model, got 0");
     }
-    const bodyLeft = bodyMeshes.meshes[0];
+
     const root = new TransformNode("bodyRoot", scene);
-    bodyLeft.setParent(root);
 
-    // For better performance, we clone the half instead of loading.
-    const bodyRight = bodyLeft.clone("BodyLeft", root);
-    if (!bodyRight) {
-      throw new Error("Failed to clone the body half mesh.");
-    }
-
-    // Mirror across the YZ plane by flipping local X scale on the clone.
-    bodyRight.scaling.x *= -1;
+    bodyMeshes.meshes
+      .filter((mesh) => mesh !== root && !mesh.parent)
+      .forEach((mesh) => {
+        mesh.setParent(root);
+      });
 
     // Meshes are loaded with their original orientation (face to +z). Rotate 180 around Y axis.
     root.rotationQuaternion = Quaternion.FromEulerAngles(0, Math.PI, 0);
@@ -176,13 +171,13 @@ class BabylonApp {
     return root;
   }
 
-  private async ensureObjLoader(): Promise<void> {
-    console.info(`${LOG_TAG} Loading OBJ loader chunk...`);
+  private async ensureGltfLoader(): Promise<void> {
+    console.info(`${LOG_TAG} Loading glTF loader chunk...`);
     try {
-      await import("@babylonjs/loaders/OBJ/index.js");
-      console.info(`${LOG_TAG} OBJ loader chunk loaded.`);
+      await import("@babylonjs/loaders/glTF/2.0/index.js");
+      console.info(`${LOG_TAG} glTF loader chunk loaded.`);
     } catch (error) {
-      console.error(`${LOG_TAG} Failed to load OBJ loader chunk.`, error);
+      console.error(`${LOG_TAG} Failed to load glTF loader chunk.`, error);
       throw error;
     }
   }
