@@ -56,7 +56,7 @@ class BabylonApp {
     const watchdogMs = 10000;
     const watchdog = window.setTimeout(() => {
       console.error(`${LOG_TAG} Model load watchdog timeout after ${watchdogMs}ms.`, {
-        hint: "Check Network for missing js chunks and 3dModels/body.obj",
+        hint: "Check Network for missing js chunks and 3dModels/*",
         baseURI: document.baseURI,
       });
     }, watchdogMs);
@@ -148,7 +148,7 @@ class BabylonApp {
 
     console.info(`${LOG_TAG} ImportMeshAsync request.`, { modelUrl });
     const bodyMeshes = await ImportMeshAsync(modelUrl, scene,
-        { meshNames: ["BodyLeft"]}); // "BodyLeft" is a half of the body model (left for our view when looking on face).
+        { meshNames: ["BodyRight"]}); // "BodyRight" is a half of the body model (left for our view when looking on face).
     console.info(`${LOG_TAG} ImportMeshAsync response.`, {
       meshCount: bodyMeshes.meshes.length,
       meshNames: bodyMeshes.meshes.map((mesh) => mesh.name),
@@ -162,7 +162,7 @@ class BabylonApp {
     bodyLeft.setParent(root);
 
     // For better performance, we clone the half instead of loading.
-    const bodyRight = bodyLeft.clone("BodyRight", root);
+    const bodyRight = bodyLeft.clone("BodyLeft", root);
     if (!bodyRight) {
       throw new Error("Failed to clone the body half mesh.");
     }
