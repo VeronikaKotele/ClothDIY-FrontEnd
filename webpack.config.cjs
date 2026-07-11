@@ -10,10 +10,19 @@ module.exports = (_, argv) => {
   return {
   entry: path.resolve(appDirectory, "src/app.ts"), //path to the main .ts file
   output: {
-    filename: "js/app.js", //name for the javascript file that is created/compiled in memory
+    filename: isProduction ? "js/[name].[contenthash:8].js" : "js/app.js",
+    chunkFilename: isProduction ? "js/[name].[contenthash:8].js" : "js/[name].app.js",
     path: path.resolve(appDirectory, "dist"),
     publicPath: isProduction ? "/ClothDIY-FrontEnd/" : "/",
     clean: true,
+  },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+    },
+    runtimeChunk: "single",
+    moduleIds: "deterministic",
+    chunkIds: "deterministic",
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],

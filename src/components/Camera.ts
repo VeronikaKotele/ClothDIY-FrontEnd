@@ -1,8 +1,8 @@
 import {
   Scene,
-  ArcRotateCamera,
-  Vector3,
-} from "@babylonjs/core";
+} from "@babylonjs/core/scene.js";
+import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera.js";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 
 export class Camera {
   private camera: ArcRotateCamera;

@@ -1,14 +1,13 @@
 import {
   AbstractMesh,
-  AxesViewer,
-  Engine,
-  Scene,
-  Vector3,
-  HemisphericLight,
-  ImportMeshAsync,
-  Quaternion,
-  TransformNode,
-} from "@babylonjs/core";
+} from "@babylonjs/core/Meshes/abstractMesh.js";
+import { AxesViewer } from "@babylonjs/core/Debug/axesViewer.js";
+import { Engine } from "@babylonjs/core/Engines/engine.js";
+import { Scene } from "@babylonjs/core/scene.js";
+import { Vector3, Quaternion } from "@babylonjs/core/Maths/math.vector.js";
+import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight.js";
+import { ImportMeshAsync } from "@babylonjs/core/Loading/sceneLoader.js";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Camera } from "./Camera.js";
 
 const LOG_TAG = "[BabylonApp]";
