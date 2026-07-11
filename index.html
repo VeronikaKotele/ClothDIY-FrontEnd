@@ -5,95 +5,109 @@
         <title>BodyBuilder</title>
         <link rel="stylesheet" href="src/css/styles.css">
         <link rel="icon" type="image/svg+xml" href="./public/icons/zoom-reset-svgrepo-com.svg" />
+        <script src="src/components/uiControls.js" defer></script>
     </head>
     <body>
         <div class="bodyBuilderContainer">
             <div class="canvas3DContainer">
                 <canvas id="bodyBuilderCanvas"></canvas>
                 <div class="canvas3DControls">
-                    <button id="resetCameraButton">
+                    <button id="resetCameraButton" class="transparentButton">
                         <svg class="icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/zoom-reset-svgrepo-com.svg#i-zoom-reset"></use>
+                        </svg>
+                    </button>
+                    <button id="openBodyInputsPannel" class="transparentButton" style="display: none;" aria-label="Open Body Inputs Pannel">
+                        <svg class="icon" width="30" height="30" aria-hidden="true">
+                            <use href="./public/icons/sliders.svg#i-slider"></use>
                         </svg>
                     </button>
                 </div>
             </div>
 
-            <div class="inputsContainer">
-                <div class="controlGroup">
-                    <label for="bodyTypeSelect">Body Type:</label>
-                    <select id="bodyTypeSelect">
-                        <option value="male">Male</option>
-                        <option value="female" selected>Female</option>
-                    </select>
+            <div class="inputsContainer" id="bodyInputsPannel">
+                <button id="closeBodyInputsPannel" class="toggleSidePannelButton" aria-label="Open Body Inputs Pannel">
+                    <svg class="icon" width="30" height="30" aria-hidden="true">
+                        <use href="./public/icons/angles-right.svg#i-angles-right"></use>
+                    </svg>
+                </button>
+
+                <div class="inputsContainerScrollArea">
+                    <div class="controlGroup">
+                        <label for="bodyTypeSelect">Body Type:</label>
+                        <select id="bodyTypeSelect">
+                            <option value="male">Male</option>
+                            <option value="female" selected>Female</option>
+                        </select>
+                    </div>
+
+                    <form class="body-parameters-input-form" data-body-parameters-input-form>
+                        <label class="" for="neck-circumference">Neck Circumference</label>
+                        <input class="" type="number" id="neck-circumference" name="neck-circumference" />
+
+                        <label class="" for="high-bust-circumference">High Bust Circumference</label>
+                        <input class="" type="number" id="high-bust-circumference" name="high-bust-circumference" />
+
+                        <label class="" for="bust-circumference">Bust Circumference</label>
+                        <input class="" type="number" id="bust-circumference" name="bust-circumference" />
+
+                        <label class="" for="underbust-circumference">Underbust Circumference</label>
+                        <input class="" type="number" id="underbust-circumference" name="underbust-circumference" />
+
+                        <label class="" for="waist-circumference">Waist Circumference</label>
+                        <input class="" type="number" id="waist-circumference" name="waist-circumference" />
+
+                        <label class="" for="high-hip-circumference">High Hip Circumference</label>
+                        <input class="" type="number" id="high-hip-circumference" name="high-hip-circumference" />
+
+                        <label class="" for="hip-circumference">Hip Circumference (Full Hip)</label>
+                        <input class="" type="number" id="hip-circumference" name="hip-circumference" />
+
+                        <label class="" for="abdomen-circumference">Abdomen Circumference</label>
+                        <input class="" type="number" id="abdomen-circumference" name="abdomen-circumference" />
+
+                        <label class="" for="upper-arm-circumference">Upper Arm Circumference (Biceps)</label>
+                        <input class="" type="number" id="upper-arm-circumference" name="upper-arm-circumference" />
+
+                        <label class="" for="thigh-circumference">Thigh Circumference</label>
+                        <input class="" type="number" id="thigh-circumference" name="thigh-circumference" />
+
+                        <label class="" for="knee-circumference">Knee Circumference</label>
+                        <input class="" type="number" id="knee-circumference" name="knee-circumference" />
+
+                        <label class="" for="front-chest-length">Front Chest Length</label>
+                        <input class="" type="number" id="front-chest-length" name="front-chest-length" />
+
+                        <label class="" for="back-chest-length">Back Chest Length</label>
+                        <input class="" type="number" id="back-chest-length" name="back-chest-length" />
+
+                        <label class="" for="front-waist-length">Front Waist Length</label>
+                        <input class="" type="number" id="front-waist-length" name="front-waist-length" />
+
+                        <label class="" for="back-waist-length">Back Waist Length</label>
+                        <input class="" type="number" id="back-waist-length" name="back-waist-length" />
+
+                        <label class="" for="front-crotch-length">Front Crotch Length</label>
+                        <input class="" type="number" id="front-crotch-length" name="front-crotch-length" />
+
+                        <label class="" for="inseam-length">Inseam Length</label>
+                        <input class="" type="number" id="inseam-length" name="inseam-length" />
+
+                        <label class="" for="outseam-length">Outseam Length (Waist to Floor)</label>
+                        <input class="" type="number" id="outseam-length" name="outseam-length" />
+
+                        <label class="" for="skirt-length">Skirt Length</label>
+                        <input class="" type="number" id="skirt-length" name="skirt-length" />
+
+                        <label class="" for="sleeve-length">Sleeve Length</label>
+                        <input class="" type="number" id="sleeve-length" name="sleeve-length" />
+
+
+                        <button class="search-formButton" type="submit" aria-label="Save">
+                            Save
+                        </button>
+                    </form>
                 </div>
-
-                <form class="body-parameters-input-form" data-body-parameters-input-form>
-                    <label class="" for="neck-circumference">Neck Circumference</label>
-                    <input class="" type="number" id="neck-circumference" name="neck-circumference" />
-
-                    <label class="" for="high-bust-circumference">High Bust Circumference</label>
-                    <input class="" type="number" id="high-bust-circumference" name="high-bust-circumference" />
-
-                    <label class="" for="bust-circumference">Bust Circumference</label>
-                    <input class="" type="number" id="bust-circumference" name="bust-circumference" />
-
-                    <label class="" for="underbust-circumference">Underbust Circumference</label>
-                    <input class="" type="number" id="underbust-circumference" name="underbust-circumference" />
-
-                    <label class="" for="waist-circumference">Waist Circumference</label>
-                    <input class="" type="number" id="waist-circumference" name="waist-circumference" />
-
-                    <label class="" for="high-hip-circumference">High Hip Circumference</label>
-                    <input class="" type="number" id="high-hip-circumference" name="high-hip-circumference" />
-
-                    <label class="" for="hip-circumference">Hip Circumference (Full Hip)</label>
-                    <input class="" type="number" id="hip-circumference" name="hip-circumference" />
-
-                    <label class="" for="abdomen-circumference">Abdomen Circumference</label>
-                    <input class="" type="number" id="abdomen-circumference" name="abdomen-circumference" />
-
-                    <label class="" for="upper-arm-circumference">Upper Arm Circumference (Biceps)</label>
-                    <input class="" type="number" id="upper-arm-circumference" name="upper-arm-circumference" />
-
-                    <label class="" for="thigh-circumference">Thigh Circumference</label>
-                    <input class="" type="number" id="thigh-circumference" name="thigh-circumference" />
-
-                    <label class="" for="knee-circumference">Knee Circumference</label>
-                    <input class="" type="number" id="knee-circumference" name="knee-circumference" />
-
-                    <label class="" for="front-chest-length">Front Chest Length</label>
-                    <input class="" type="number" id="front-chest-length" name="front-chest-length" />
-
-                    <label class="" for="back-chest-length">Back Chest Length</label>
-                    <input class="" type="number" id="back-chest-length" name="back-chest-length" />
-
-                    <label class="" for="front-waist-length">Front Waist Length</label>
-                    <input class="" type="number" id="front-waist-length" name="front-waist-length" />
-
-                    <label class="" for="back-waist-length">Back Waist Length</label>
-                    <input class="" type="number" id="back-waist-length" name="back-waist-length" />
-
-                    <label class="" for="front-crotch-length">Front Crotch Length</label>
-                    <input class="" type="number" id="front-crotch-length" name="front-crotch-length" />
-
-                    <label class="" for="inseam-length">Inseam Length</label>
-                    <input class="" type="number" id="inseam-length" name="inseam-length" />
-
-                    <label class="" for="outseam-length">Outseam Length (Waist to Floor)</label>
-                    <input class="" type="number" id="outseam-length" name="outseam-length" />
-
-                    <label class="" for="skirt-length">Skirt Length</label>
-                    <input class="" type="number" id="skirt-length" name="skirt-length" />
-
-                    <label class="" for="sleeve-length">Sleeve Length</label>
-                    <input class="" type="number" id="sleeve-length" name="sleeve-length" />
-
-
-                    <button class="search-form__button" type="submit" aria-label="Save">
-                        Save
-                    </button>
-                </form>
             </div>
         </div>
     </body>

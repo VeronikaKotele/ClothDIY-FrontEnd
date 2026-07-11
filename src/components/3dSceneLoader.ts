@@ -18,7 +18,10 @@ class BabylonApp {
   private canvas: HTMLCanvasElement;
   private engine: Engine;
   private scene: Scene | null = null;
-  private camera: Camera | null = null;  private targetSceneHight: number = 10; // Desired size for the largest dimension of the model
+  private camera: Camera | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private resizeFrameId: number | null = null;
+  private targetSceneHight: number = 10; // Desired size for the largest dimension of the model
 
   constructor(canvas: HTMLCanvasElement, targetSceneHight?: number) {
     this.canvas = canvas;
@@ -31,6 +34,8 @@ class BabylonApp {
     if (targetSceneHight !== undefined) {
       this.targetSceneHight = targetSceneHight;
     }
+
+    this.setupResizeObserver();
   }
 
   public resetCamera() {
@@ -49,6 +54,28 @@ class BabylonApp {
     console.info(`${LOG_TAG} Scene created.`);
     
     return scene;
+  }
+
+  private setupResizeObserver() {
+    if (typeof ResizeObserver !== "undefined") {
+      const resizeTarget = this.canvas.parentElement ?? this.canvas;
+
+      this.resizeObserver = new ResizeObserver(() => {
+        if (this.resizeFrameId !== null) {
+          return;
+        }
+
+        this.resizeFrameId = window.requestAnimationFrame(() => {
+          this.resizeFrameId = null;
+          this.engine.resize();
+        });
+      });
+      this.resizeObserver.observe(resizeTarget);
+    } else {
+      window.addEventListener("resize", () => {
+        this.engine.resize();
+      });
+    }
   }
 
   private startModelLoad(scene: Scene): void {
