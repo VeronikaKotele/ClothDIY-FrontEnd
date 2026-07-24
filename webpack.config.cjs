@@ -70,6 +70,7 @@ module.exports = (_, argv) => {
         { from: path.resolve(appDirectory, "3dModels"), to: "3dModels" },
         { from: path.resolve(appDirectory, "public"), to: "public" },
         { from: path.resolve(appDirectory, "src/css"), to: "src/css" },
+        { from: path.resolve(appDirectory, "src/scripts/uiControls.js"), to: "src/components/uiControls.js" },
       ],
     }),
   ],

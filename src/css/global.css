@@ -11,7 +11,8 @@ body {
 
 .bodyBuilderContainer {
     width: 100%;
-    height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
     display: flex;
     flex-direction: row;
 }
@@ -19,7 +20,8 @@ body {
 .bodyBuilderContainer > * {
     flex-grow: 1;
     flex-shrink: 1;
-    height: 100vh;
+	min-height: 0;
+	min-width: 0;
 	position: relative;
 }
 
