@@ -1,10 +1,11 @@
 import {
   Scene,
 } from "@babylonjs/core/scene.js";
+import type { ICamera } from "../interfaces/3dSceneInterfaces.js";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera.js";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 
-export class Camera {
+export class Camera implements ICamera {
   private camera: ArcRotateCamera;
   private defaultPosition: Vector3;
   private defaultTarget: Vector3;

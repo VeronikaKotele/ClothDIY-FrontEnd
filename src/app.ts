@@ -1,5 +1,8 @@
+import type { IBodyManager, ISceneManager } from "./interfaces/3dSceneInterfaces.js";
+
 class BodyBuilderApp {
-  private scene: { resetCamera: () => void } | null = null;
+  private sceneManager: ISceneManager | null = null;
+  private bodyManager: IBodyManager | null = null;
   private isSceneLoading = false;
 
   constructor() {
@@ -13,8 +16,8 @@ class BodyBuilderApp {
     const resetCameraButton = document.getElementById('resetCameraButton');
     if (resetCameraButton instanceof HTMLButtonElement) {
       resetCameraButton.addEventListener('click', () => {
-        if (this.scene) {
-          this.scene.resetCamera();
+        if (this.sceneManager) {
+          this.sceneManager.resetCamera();
         }
       });
     }
@@ -30,8 +33,9 @@ class BodyBuilderApp {
     const loadScene = async () => {
       try {
         console.info("[BodyBuilderApp] Loading Babylon scene module...");
-        const { load3DScene } = await import("./components/3dSceneLoader.js");
-        this.scene = load3DScene(canvas);
+        const { load3DScene } = await import("./components/SceneManager.js");
+        this.sceneManager = load3DScene(canvas);
+        this.bodyManager = this.sceneManager.getBodyManager();
       } catch (error) {
         console.error("[BodyBuilderApp] Failed to load Babylon scene module.", error);
       }
@@ -50,6 +54,23 @@ class BodyBuilderApp {
         void loadScene();
       }, 0);
     }
+  }
+
+  public async onBodyHeightChanged(newHeight: number): Promise<void> {
+    if (!this.bodyManager) {
+      console.warn("[BodyBuilderApp] BodyManager is not initialized yet.");
+      return;
+    }
+
+    this.bodyManager.updateHeight(newHeight)
+    .then((result: boolean) => {
+      if (result) {
+        console.info("[BodyBuilderApp] Body height changed to:", newHeight);
+      }
+    })
+    .catch((error) => {
+      console.error("[BodyBuilderApp] Failed to update body height:", error);
+    });
   }
 }
 

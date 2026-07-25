@@ -10,7 +10,7 @@ module.exports = (_, argv) => {
   return {
   entry: path.resolve(appDirectory, "src/app.ts"), //path to the main .ts file
   output: {
-    filename: isProduction ? "js/[name].[contenthash:8].js" : "js/app.js",
+    filename: isProduction ? "js/[name].[contenthash:8].js" : "js/[name].js",
     chunkFilename: isProduction ? "js/[name].[contenthash:8].js" : "js/[name].app.js",
     path: path.resolve(appDirectory, "dist"),
     publicPath: isProduction ? "/ClothDIY-FrontEnd/" : "/",
