@@ -58,23 +58,7 @@ export function applyTargetHeight(node: TransformNode, targetHeight: number, bou
     }
 
     const uniformScale = targetHeight / loadedBodyHeight;
-    node.scaling.setAll(uniformScale);
-
-    // const position = node.position.clone();
-    // node.position = center.scale(-uniformScale);
-    // node.scaling.setAll(uniformScale);
-    // node.position = center.scale(-uniformScale);
-    // node.scaling.setAll(uniformScale);
-    // // With parent scale applied first, translation must also be scaled to keep center at origin.
-    // node.position = center.scale(-uniformScale);
-    // // Lift the node so its lowest point sits on y = 0.
-    // const moveY = (size.y * uniformScale) / 2;
-    // node.position.y += moveY;
-    // console.info(`${LOG_TAG} Model transform applied.`, {
-    //   uniformScale,
-    //   size,
-    //   position: node.position,
-    // });
+    node.scaling = node.scaling.multiplyByFloats(uniformScale, uniformScale, uniformScale);
 
     if (updatedBoundingBox) {
         boundingBox.min = boundsMin.scale(uniformScale);

@@ -38,9 +38,11 @@ export class BodyBuilderApp {
         console.info("[BodyBuilderApp] Loading Babylon scene module...");
         const { load3DScene } = await import("./components/SceneManager.js");
         this.sceneManager = load3DScene(canvas);
-        this.bodyManager = this.sceneManager.getBodyManager();
+        await this.waitForBodyManagerReady();
       } catch (error) {
         console.error("[BodyBuilderApp] Failed to load Babylon scene module.", error);
+      } finally {
+        this.isSceneLoading = false;
       }
     };
 
@@ -57,6 +59,27 @@ export class BodyBuilderApp {
         void loadScene();
       }, 0);
     }
+  }
+
+  private async waitForBodyManagerReady(timeoutMs = 12000): Promise<void> {
+    const startedAt = performance.now();
+
+    while (performance.now() - startedAt < timeoutMs) {
+      const bodyManager = this.sceneManager?.getBodyManager() ?? null;
+      if (bodyManager) {
+        this.bodyManager = bodyManager;
+        console.info("[BodyBuilderApp] BodyManager is ready.");
+        return;
+      }
+
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 100);
+      });
+    }
+
+    console.warn("[BodyBuilderApp] BodyManager did not become ready before timeout.", {
+      timeoutMs,
+    });
   }
 
   public async onBodyHeightChanged(newHeight: number): Promise<void> {

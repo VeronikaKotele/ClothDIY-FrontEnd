@@ -25,10 +25,16 @@ export class BodyManager implements IBodyManager {
       return false; // No significant change, no update needed
     }
 
+    if (newHeight <= 100 || newHeight > 300) {
+      console.warn(`${LOG_TAG} Requested height is out of reasonable bounds.`, {
+        requestedHeight: newHeight,
+      });
+      return false; // Height out of reasonable bounds
+    }
+
     try {
       this.bodyHeight = newHeight;
       applyTargetHeight(this.modelRoot, newHeight, this.boundingBox);
-      placeNodeOnOrigin(this.modelRoot, this.boundingBox);
     } catch (error) {
       console.error(`${LOG_TAG} Failed to update body height.`, error);
       return false; // Update failed
