@@ -63,9 +63,9 @@
 
 	.body-parameters-input-form {
 		display: grid;
-		grid-template-columns: minmax(220px, 1fr) 140px;
-		column-gap: 14px;
-		row-gap: 10px;
+		grid-template-columns: minmax(100px, 1fr) 70px;
+		column-gap: 10px;
+		row-gap: 15px;
 		align-items: center;
 	}
 
@@ -80,14 +80,37 @@
 	.body-parameters-input-form input {
 		justify-self: end;
 		width: 100%;
-		max-width: 140px;
+		max-width: 45px;
 		height: 34px;
-		padding: 0 10px;
+		padding: 0;
 		border: 1px solid #c7d5f1;
 		border-radius: 8px;
 		box-sizing: border-box;
 		text-align: right;
 		font-variant-numeric: tabular-nums;
+		color: #153163;
+	}
+
+	.body-parameters-input-form .input-with-unit {
+		justify-self: end;
+		display: grid;
+		grid-template-columns: minmax(45px, 1fr) auto;
+		align-items: center;
+		column-gap: 6px;
+		width: 100%;
+		max-width: 74px;
+	}
+
+	.body-parameters-input-form .input-with-unit input {
+		justify-self: stretch;
+		max-width: none;
+	}
+
+	.body-parameters-input-form .input-unit {
+		font-size: 12px;
+		font-weight: 600;
+		color: #355387;
+		text-transform: lowercase;
 	}
 
 	.search-formButton {
@@ -120,9 +143,14 @@
 		}
 
 		.body-parameters-input-form label,
-		.body-parameters-input-form input {
+		.body-parameters-input-form input,
+		.body-parameters-input-form .input-with-unit {
 			justify-self: stretch;
 			max-width: none;
+		}
+
+		.body-parameters-input-form .input-with-unit {
+			grid-template-columns: 1fr auto;
 		}
 	}
 }

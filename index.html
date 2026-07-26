@@ -5,7 +5,7 @@
         <title>BodyBuilder</title>
         <link rel="stylesheet" href="src/css/styles.css">
         <link rel="icon" type="image/svg+xml" href="./public/icons/zoom-reset-svgrepo-com.svg" />
-        <script src="src/scripts/uiControls.js" defer></script>
+        <script type="module" src="src/scripts/uiControls.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
@@ -34,29 +34,44 @@
                 </button>
 
                 <div class="inputsContainerScrollArea">
-                    <div class="controlGroup">
+                    <!-- <div class="controlGroup">
                         <label for="bodyTypeSelect">Body Type:</label>
                         <select id="bodyTypeSelect">
                             <option value="male">Male</option>
                             <option value="female" selected>Female</option>
                         </select>
-                    </div>
+                    </div> -->
 
                     <form class="body-parameters-input-form" data-body-parameters-input-form>
                         <label class="" for="height">Висота</label>
-                        <input class="" type="number" id="height" name="height" />
+                        <div class="input-with-unit">
+                            <input class="" type="number" id="height" name="height" />
+                            <span class="input-unit">cm</span>
+                        </div>
 
                         <label class="" for="bust-circumference">Обхват грудей</label>
-                        <input class="" type="number" id="bust-circumference" name="bust-circumference" />
+                        <div class="input-with-unit">
+                            <input class="" type="number" id="bust-circumference" name="bust-circumference" />
+                            <span class="input-unit">cm</span>
+                        </div>
                         
                         <label class="" for="waist-circumference">Обхват талії</label>
-                        <input class="" type="number" id="waist-circumference" name="waist-circumference" />
+                        <div class="input-with-unit">
+                            <input class="" type="number" id="waist-circumference" name="waist-circumference" />
+                            <span class="input-unit">cm</span>
+                        </div>
                         
                         <label class="" for="hip-circumference">Обхват стегон</label>
-                        <input class="" type="number" id="hip-circumference" name="hip-circumference" />
+                        <div class="input-with-unit">
+                            <input class="" type="number" id="hip-circumference" name="hip-circumference" />
+                            <span class="input-unit">cm</span>
+                        </div>
                         
                         <label class="" for="sleeve-length">Довжина рукава</label>
-                        <input class="" type="number" id="sleeve-length" name="sleeve-length" />
+                        <div class="input-with-unit">
+                            <input class="" type="number" id="sleeve-length" name="sleeve-length" />
+                            <span class="input-unit">cm</span>
+                        </div>
                         
                         <!-- <label class="" for="neck-circumference">Neck Circumference</label>
                         <input class="" type="number" id="neck-circumference" name="neck-circumference" />
