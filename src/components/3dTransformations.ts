@@ -1,4 +1,4 @@
-import { Vector3, Quaternion } from "@babylonjs/core/Maths/math.vector.js";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 
 const LOG_TAG = "[3dTransformations]";

@@ -1,6 +1,7 @@
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
+import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 
 import { applyTargetHeight, placeNodeOnOrigin } from "./3dTransformations.js";
 import type { IBodyManager } from "../interfaces/3dSceneInterfaces.js";
@@ -29,9 +30,21 @@ export class BodyManager implements IBodyManager {
     this.boundingBox = boundingBox;
 
     this.debugElements = createBodyDebugElements(this.modelRoot.getScene(), boundingBox, model);
-    this.bustMidPlane = createDebugHorizontalPlane(this.modelRoot.getScene(), Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight);
-    this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(), Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight);
-    this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(), Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight);
+
+    const rightBodyPartMesh = model.getChildren((child) => 
+      child instanceof Mesh && child.name.includes("Right"), false)[0] as Mesh;
+
+    console.info(`${LOG_TAG} Creating debug horizontal planes for bust measurements.`);
+
+    this.bustMidPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+      Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
+      rightBodyPartMesh, Color3.Magenta());
+    this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+      Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
+      rightBodyPartMesh, Color3.Red());
+    this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+      Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
+      rightBodyPartMesh, Color3.Blue());
   }
 
   public async updateHeight(newHeight: number): Promise<boolean> {

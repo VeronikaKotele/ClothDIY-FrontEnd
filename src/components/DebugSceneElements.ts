@@ -8,6 +8,9 @@ import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { AxesViewer } from "@babylonjs/core/Debug/axesViewer.js";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
+import { computeHorizontalPlaneIntersectionLength } from "./ComputationalGeometry.js";
+
+const LOG_TAG = "[DebugSceneElements]";
 
 export function createSceneDebugElements(scene: Scene)
 {
@@ -69,12 +72,46 @@ export function createBodyDebugElements(scene: Scene,
     return boundingBoxLines;
 }
 
-export function createDebugHorizontalPlane(scene: Scene, height: number): Mesh {
+export function createDebugHorizontalPlane(scene: Scene, height: number, model: Mesh, color: Color3 = Color3.White()): Mesh {
     const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: 30, height: 30 }, scene);
     plane.position = new Vector3(0, height, 0);
     plane.rotation = new Vector3(Math.PI / 2, 0, 0);
     plane.visibility = 0.5;
+    const planeMaterial = new StandardMaterial("debugHorizontalPlaneMaterial", scene);
+    planeMaterial.diffuseColor = color;
+    planeMaterial.emissiveColor = color;
+    planeMaterial.disableLighting = true;
+    planeMaterial.backFaceCulling = false;
+    plane.material = planeMaterial;
     plane.isPickable = false;
+
+    // Calculate the length of intersection between the plane and the model mesh.
+    // `model` is only the "Right" half of the (symmetric) body mesh, so double it to
+    // approximate the full circumference at this height.
+    const halfIntersectionLength = computeHorizontalPlaneIntersectionLength(model, height);
+    const circumference = halfIntersectionLength * 2;
+
+    console.info(`${LOG_TAG} Computed horizontal plane intersection.`, {
+      height,
+      halfIntersectionLength,
+      circumference,
+    });
+
+    const labelText = MeshBuilder.CreatePlane("debugHorizontalPlaneLabel", { width: 40, height: 10 }, scene);
+    labelText.position = new Vector3(30, height + 5, -20);
+    labelText.billboardMode = 7; // Make the label always face the camera
+
+    const labelTexture = new DynamicTexture("debugHorizontalPlaneLabelTexture", { width: 400, height: 100 }, scene, true);
+    labelTexture.hasAlpha = true;
+    labelTexture.drawText(`Circumference cm: ${circumference.toFixed(1)}`, null, 100, "bold 26px Arial", "white", "transparent", true);
+
+    const labelMaterial = new StandardMaterial("debugHorizontalPlaneLabelMaterial", scene);
+    labelMaterial.diffuseTexture = labelTexture;
+    labelMaterial.emissiveColor = color;
+    labelMaterial.disableLighting = true;
+    labelMaterial.backFaceCulling = false;
+
+    labelText.material = labelMaterial;
 
     return plane;
 }
