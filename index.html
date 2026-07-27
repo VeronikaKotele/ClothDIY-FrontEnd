@@ -12,9 +12,29 @@
             <div class="canvas3DContainer">
                 <canvas id="bodyBuilderCanvas"></canvas>
                 <div class="canvas3DControls">
-                    <button id="resetCameraButton" class="transparentButton">
+                    <button id="resetCameraButton" class="transparentButton"  aria-label="Reset camera to default view">
                         <svg class="icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/zoom-reset-svgrepo-com.svg#i-zoom-reset"></use>
+                        </svg>
+                    </button>
+                    <button id="camera-projection-mode" class="transparentButton" aria-label="Toggle Projection Mode: perspective or orthographic">
+                        <svg class="icon" width="30" height="30" aria-hidden="true">
+                            <use href="./public/icons/projection.svg#i-projection"></use>
+                        </svg>
+                    </button>
+                    <button id="camera-position-top" class="transparentButton" aria-label="Look from top">
+                        <svg class="icon view-orientation-icon" width="30" height="30" aria-hidden="true">
+                            <use href="./public/icons/cube.svg#i-cube"></use>
+                        </svg>
+                    </button>
+                    <button id="camera-position-front" class="transparentButton" aria-label="Look from front">
+                        <svg class="icon view-orientation-icon" width="30" height="30" aria-hidden="true">
+                            <use href="./public/icons/cube.svg#i-cube"></use>
+                        </svg>
+                    </button>
+                    <button id="camera-position-side" class="transparentButton" aria-label="Look from side">
+                        <svg class="icon view-orientation-icon" width="30" height="30" aria-hidden="true" >
+                            <use href="./public/icons/cube.svg#i-cube"></use>
                         </svg>
                     </button>
                     <button id="openBodyInputsPannel" class="transparentButton" style="display: none;" aria-label="Open Body Inputs Pannel">
@@ -26,7 +46,7 @@
             </div>
 
             <div class="inputsContainer" id="bodyInputsPannel">
-                <button id="closeBodyInputsPannel" class="toggleSidePannelButton" aria-label="Open Body Inputs Pannel">
+                <button id="closeBodyInputsPannel" class="toggleSidePannelButton" aria-label="Close Body Inputs Pannel">
                     <svg class="icon" width="30" height="30" aria-hidden="true">
                         <use href="./public/icons/angles-right.svg#i-angles-right"></use>
                     </svg>

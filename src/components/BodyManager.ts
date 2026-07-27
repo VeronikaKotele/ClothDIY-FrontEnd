@@ -2,6 +2,7 @@ import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
+import { Material } from "@babylonjs/core/Materials/material.js";
 
 import { applyTargetHeight, placeNodeOnOrigin } from "./3dTransformations.js";
 import type { IBodyManager } from "../interfaces/3dSceneInterfaces.js";
@@ -13,6 +14,7 @@ const LOG_TAG = "[BodyManager]";
 console.info(`${LOG_TAG} App bootstrap started.`);
 
 const MINIMAL_CHANGE_SENSITIVITY_CM = 1; // Minimum change in centimeters to trigger an update
+const DEBUG_MODEL_ALPHA = 0.3;
 
 export class BodyManager implements IBodyManager {
   private modelRoot: TransformNode;
@@ -20,9 +22,9 @@ export class BodyManager implements IBodyManager {
   private boundingBox: { min: Vector3; max: Vector3 };
 
   private debugElements: ReturnType<typeof createBodyDebugElements> | null = null;
-  private bustMidPlane: Mesh;
-  private bustTopPlane: Mesh;
-  private bustBottomPlane: Mesh;
+  private bustMidPlane: TransformNode;
+  // private bustTopPlane: TransformNode;
+  // private bustBottomPlane: TransformNode;
 
   constructor(model: TransformNode, bodyHeight: number, boundingBox: { min: Vector3; max: Vector3 }) {
     this.modelRoot = model;
@@ -31,6 +33,34 @@ export class BodyManager implements IBodyManager {
 
     this.debugElements = createBodyDebugElements(this.modelRoot.getScene(), boundingBox, model);
 
+    this.modelRoot.getChildMeshes().forEach(mesh => {
+      // For transparent meshes, set material alpha instead of mesh.hasVertexAlpha.
+      // hasVertexAlpha expects per-vertex alpha data and can produce washed-out results.
+      mesh.hasVertexAlpha = false;
+      mesh.visibility = 1;
+
+      const material = mesh.material;
+      if (material) {
+        material.alpha = DEBUG_MODEL_ALPHA;
+
+        if ("transparencyMode" in material) {
+          (material as Material & { transparencyMode: number }).transparencyMode = Material.MATERIAL_ALPHABLEND;
+        }
+
+        if ("needDepthPrePass" in material) {
+          (material as Material & { needDepthPrePass: boolean }).needDepthPrePass = true;
+        }
+      } else {
+        // Fallback when a mesh has no material assigned.
+        mesh.visibility = DEBUG_MODEL_ALPHA;
+      }
+
+      console.debug(`${LOG_TAG} Set mesh transparency for debug visualization.`, {
+        meshName: mesh.name,
+        materialName: material?.name,
+        alpha: material?.alpha,
+      });
+    });
     const rightBodyPartMesh = model.getChildren((child) => 
       child instanceof Mesh && child.name.includes("Right"), false)[0] as Mesh;
 
@@ -39,12 +69,12 @@ export class BodyManager implements IBodyManager {
     this.bustMidPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
       rightBodyPartMesh, Color3.Magenta());
-    this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
-      Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh, Color3.Red());
-    this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
-      Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh, Color3.Blue());
+    // this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+    //   Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
+    //   rightBodyPartMesh, Color3.Red());
+    // this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+    //   Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
+    //   rightBodyPartMesh, Color3.Blue());
   }
 
   public async updateHeight(newHeight: number): Promise<boolean> {
@@ -61,8 +91,8 @@ export class BodyManager implements IBodyManager {
 
     this.debugElements?.scaling.scaleInPlace(newHeight / this.bodyHeight);
     this.bustMidPlane.position.y = Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * newHeight;
-    this.bustTopPlane.position.y = Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * newHeight;
-    this.bustBottomPlane.position.y = Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * newHeight;
+    // this.bustTopPlane.position.y = Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * newHeight;
+    // this.bustBottomPlane.position.y = Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * newHeight;
 
     try {
       this.bodyHeight = newHeight;

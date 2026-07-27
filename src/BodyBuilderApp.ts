@@ -100,4 +100,21 @@ export class BodyBuilderApp {
       console.error("[BodyBuilderApp] Failed to update body height:", error);
     });
   }
+
+  public OnToggleCameraPosition(position: 'top' | 'front' | 'side') {
+    if (!this.sceneManager) {
+      console.warn("[BodyBuilderApp] Camera is not initialized yet.");
+      return;
+    }
+
+    this.sceneManager.setCameraPosition(position);
+  }
+
+  public onToggleProjectionMode() {
+    if (!this.sceneManager) {
+      console.warn("[BodyBuilderApp] Camera is not initialized yet.");
+      return;
+    }
+    this.sceneManager.toggleProjectionMode();
+  }
 }

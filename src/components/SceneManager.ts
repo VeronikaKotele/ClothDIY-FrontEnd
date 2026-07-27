@@ -46,6 +46,21 @@ class SceneManager implements ISceneManager {
       this.camera.resetCamera();    }
   }
 
+  public toggleProjectionMode() {
+    if (this.camera) {
+      this.camera.toggleProjectionMode();
+    }
+  }
+
+  public setCameraPosition(position: 'top' | 'front' | 'side') {
+    if (!this.camera) {
+      console.warn(`${LOG_TAG} Camera is not initialized yet.`);
+      return;
+    }
+
+    this.camera.setPosition(position);
+  }
+
   private async createScene(): Promise<Scene> {
     console.info(`${LOG_TAG} createScene started.`);
     const scene = new Scene(this.engine);

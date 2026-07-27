@@ -27,12 +27,61 @@
         border: none;
         display: flex;
         line-height: 0;
+        position: relative;
     }
 
-    .canvas3DControls .transparentButton .icon { display: block; }
+    .canvas3DControls .transparentButton .icon {
+        display: block;
+        transform-origin: 50% 50%;
+        transform: rotate(var(--icon-rotation, 0deg));
+        transition: transform 120ms ease, color 120ms ease;
+    }
 
     .canvas3DControls .transparentButton:hover .icon {
         color: #678bd3;
-        transform: scale(1.1);
+        transform: rotate(var(--icon-rotation, 0deg)) scale(1.1);
+    }
+
+    .canvas3DControls #camera-position-top {
+        --icon-rotation: 120deg;
+    }
+
+    .canvas3DControls #camera-position-front {
+        --icon-rotation: 0deg;
+    }
+
+    .canvas3DControls #camera-position-side {
+        --icon-rotation: -120deg;
+    }
+
+    .canvas3DControls .transparentButton[aria-label]:not([aria-label=""])::after {
+        content: attr(aria-label);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: rgba(24, 30, 44, 0.95);
+        color: #ffffff;
+        font-size: 12px;
+        line-height: 1.2;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+        z-index: 20;
+    }
+
+    .canvas3DControls .transparentButton[aria-label]:not([aria-label=""]):hover::after,
+    .canvas3DControls .transparentButton[aria-label]:not([aria-label=""]):focus-visible::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .canvas3DControls .transparentButton[aria-label]:last-child:not([aria-label=""]):hover::after {
+        transform: translateX(-90%) translateY(0);
     }
 }

@@ -6,9 +6,9 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js"
 import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture.js";
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { AxesViewer } from "@babylonjs/core/Debug/axesViewer.js";
-import type { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
-import { computeHorizontalPlaneIntersectionLength } from "./ComputationalGeometry.js";
+import { computeHorizontalPlaneIntersectionSegments, segmentLength } from "./ComputationalGeometry.js";
 
 const LOG_TAG = "[DebugSceneElements]";
 
@@ -65,18 +65,21 @@ export function createBodyDebugElements(scene: Scene,
             [p010, p011], [p010, p110],
             [p100, p101], [p100, p110],
         ],
-        updatable: true,
     }, scene);
     boundingBoxLines.color = new Color3(1, 0, 0);
 
     return boundingBoxLines;
 }
 
-export function createDebugHorizontalPlane(scene: Scene, height: number, model: Mesh, color: Color3 = Color3.White()): Mesh {
-    const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: 30, height: 30 }, scene);
+export function createDebugHorizontalPlane(scene: Scene, height: number, model: Mesh, color: Color3 = Color3.White()): TransformNode {
+    const parentNode = new TransformNode("debugHorizontalPlaneParent", scene);
+    const xSize = 30;
+    const zSize = 30;
+    const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: xSize, height: zSize }, scene);
     plane.position = new Vector3(0, height, 0);
     plane.rotation = new Vector3(Math.PI / 2, 0, 0);
     plane.visibility = 0.5;
+    plane.parent = parentNode;
     const planeMaterial = new StandardMaterial("debugHorizontalPlaneMaterial", scene);
     planeMaterial.diffuseColor = color;
     planeMaterial.emissiveColor = color;
@@ -88,8 +91,21 @@ export function createDebugHorizontalPlane(scene: Scene, height: number, model: 
     // Calculate the length of intersection between the plane and the model mesh.
     // `model` is only the "Right" half of the (symmetric) body mesh, so double it to
     // approximate the full circumference at this height.
-    const halfIntersectionLength = computeHorizontalPlaneIntersectionLength(model, height);
+    const segments = computeHorizontalPlaneIntersectionSegments(model, height, xSize, zSize);
+    let halfIntersectionLength = 0;
+    for (const segment of segments) {
+        halfIntersectionLength += segmentLength(segment);
+    }
     const circumference = halfIntersectionLength * 2;
+    const segmentsLines = MeshBuilder.CreateLineSystem("segmentsLines", {
+        lines: [...segments, ...segments.map(([start, end]) => {
+            const reversedStart = new Vector3(-start.x, start.y, start.z);
+            const reversedEnd = new Vector3(-end.x, end.y, end.z);
+            return [reversedStart, reversedEnd];
+        })], // Add reversed segments to make lines visible from both sides
+    }, scene);
+    segmentsLines.color = color;
+    segmentsLines.parent = parentNode;
 
     console.info(`${LOG_TAG} Computed horizontal plane intersection.`, {
       height,
@@ -100,6 +116,7 @@ export function createDebugHorizontalPlane(scene: Scene, height: number, model: 
     const labelText = MeshBuilder.CreatePlane("debugHorizontalPlaneLabel", { width: 40, height: 10 }, scene);
     labelText.position = new Vector3(30, height + 5, -20);
     labelText.billboardMode = 7; // Make the label always face the camera
+    labelText.parent = parentNode;
 
     const labelTexture = new DynamicTexture("debugHorizontalPlaneLabelTexture", { width: 400, height: 100 }, scene, true);
     labelTexture.hasAlpha = true;
@@ -113,5 +130,5 @@ export function createDebugHorizontalPlane(scene: Scene, height: number, model: 
 
     labelText.material = labelMaterial;
 
-    return plane;
+    return parentNode;
 }
