@@ -23,8 +23,8 @@ export class BodyManager implements IBodyManager {
 
   private debugElements: ReturnType<typeof createBodyDebugElements> | null = null;
   private bustMidPlane: TransformNode;
-  // private bustTopPlane: TransformNode;
-  // private bustBottomPlane: TransformNode;
+  private bustTopPlane: TransformNode;
+  private bustBottomPlane: TransformNode;
 
   constructor(model: TransformNode, bodyHeight: number, boundingBox: { min: Vector3; max: Vector3 }) {
     this.modelRoot = model;
@@ -68,17 +68,18 @@ export class BodyManager implements IBodyManager {
 
     this.bustMidPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh, Color3.Magenta());
-    // this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
-    //   Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
-    //   rightBodyPartMesh, Color3.Red());
-    // this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
-    //   Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
-    //   rightBodyPartMesh, Color3.Blue());
+      rightBodyPartMesh, Color3.Magenta(), 30, 30);
+    this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+      Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
+      rightBodyPartMesh, Color3.Red(), 25, 25);
+    this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+      Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
+      rightBodyPartMesh, Color3.Blue(), 25, 25);
   }
 
   public async updateHeight(newHeight: number): Promise<boolean> {
-    if (Math.abs(this.bodyHeight - newHeight) < MINIMAL_CHANGE_SENSITIVITY_CM) {
+    const deltaHeight = this.bodyHeight - newHeight;
+    if (Math.abs(deltaHeight) < MINIMAL_CHANGE_SENSITIVITY_CM) {
       return false; // No significant change, no update needed
     }
 
@@ -90,9 +91,9 @@ export class BodyManager implements IBodyManager {
     }
 
     this.debugElements?.scaling.scaleInPlace(newHeight / this.bodyHeight);
-    this.bustMidPlane.position.y = Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * newHeight;
-    // this.bustTopPlane.position.y = Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * newHeight;
-    // this.bustBottomPlane.position.y = Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * newHeight;
+    this.bustMidPlane.translate(Vector3.Up(), deltaHeight);//.position.y = Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * newHeight;
+    this.bustTopPlane.translate(Vector3.Up(), deltaHeight);//.position.y = Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * newHeight;
+    this.bustBottomPlane.translate(Vector3.Up(), deltaHeight);//.position.y = Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * newHeight;
 
     try {
       this.bodyHeight = newHeight;

@@ -9,6 +9,9 @@ const LOG_TAG = "[ComputationalGeometry]";
 // and when deduplicating intersection points that fall on a shared triangle vertex.
 const PLANE_INTERSECTION_EPSILON = 1e-5;
 
+type Segment = [Vector3, Vector3];
+type Segments = Segment[];
+
 /**
  * Find all the segment(s) formed by intersecting a mesh with a
  * horizontal plane (a constant world-space Y). This is used to measure circumferences
@@ -18,7 +21,7 @@ const PLANE_INTERSECTION_EPSILON = 1e-5;
  * most one intersection segment, and the segments' lengths are summed.
  */
 export function computeHorizontalPlaneIntersectionSegments(mesh: Mesh, planeHeightY: number, xSize: number, zSize: number)
-  : [Vector3, Vector3][]
+  : Segments
 {
   const positions = mesh.getVerticesData(VertexBuffer.PositionKind);
   const indices = mesh.getIndices();
@@ -49,8 +52,136 @@ export function computeHorizontalPlaneIntersectionSegments(mesh: Mesh, planeHeig
   return segments;
 }
 
-export function segmentLength(segment: [Vector3, Vector3]): number {
+export function segmentLength(segment: Segment): number {
   return Vector3.Distance(segment[0], segment[1]);
+}
+
+export function removeMedianCavitations(segments: Segments) {
+  if (segments.length === 0) {
+    return;
+  }
+
+  let mostFrontPoint: Vector3 = segments[0][0];
+  let mostBackPoint: Vector3 = segments[0][0];
+  for (const [start, end] of segments) {
+    if (start.z < mostFrontPoint.z) {
+      mostFrontPoint = start;
+    }
+    if (end.z < mostFrontPoint.z) {
+      mostFrontPoint = end;
+    }
+    if (start.z > mostBackPoint.z) {
+      mostBackPoint = start;
+    }
+    if (end.z > mostBackPoint.z) {
+      mostBackPoint = end;
+    }
+  }
+
+  for (const [start, end] of segments) {
+    if (start.z < 0 && end.z < 0) {
+      if (start.x < mostFrontPoint.x && // median to the most front point
+        start.z > mostFrontPoint.z) // caviates
+      {
+        start.z = mostFrontPoint.z;
+      }
+      if (end.x < mostFrontPoint.x && // median to the most front point
+        end.z > mostFrontPoint.z) // caviates
+      {
+        end.z = mostFrontPoint.z;
+      }
+    }
+    else if (start.z > 0 && end.z > 0)
+    {
+      if (start.x < mostBackPoint.x && // median to the most back point
+        start.z < mostBackPoint.z) // caviates
+      {
+        start.z = mostBackPoint.z;
+      }
+      if (end.x < mostBackPoint.x && // median to the most back point
+        end.z < mostBackPoint.z) // caviates
+      {
+        end.z = mostBackPoint.z;
+      }
+    }
+  }
+}
+
+/**
+ * Computes the convex hull of the point cloud formed by a set of segments and returns
+ * the hull boundary as a list of segments. The input segments are expected to lie on a
+ * (roughly) constant world-space Y, e.g. the output of `computeHorizontalPlaneIntersectionSegments`;
+ * the hull is computed in the XZ plane (Y is ignored/carried through unchanged).
+ *
+ * The returned segments form the hull boundary but are NOT guaranteed to be in any
+ * particular winding order relative to the input - callers should not assume the array
+ * is pre-sorted into a continuous walk.
+ */
+export function computeConvexHull(segments: Segments): Segments {
+  if (segments.length === 0) {
+    return [];
+  }
+
+  const points = collectUniquePoints(segments);
+  if (points.length < 3) {
+    return [];
+  }
+
+  const hullPoints = computeConvexHullXZ(points);
+  if (hullPoints.length < 3) {
+    return [];
+  }
+
+  const hullSegments: Segments = [];
+  for (let i = 0; i < hullPoints.length; i++) {
+    const a = hullPoints[i];
+    const b = hullPoints[(i + 1) % hullPoints.length];
+    hullSegments.push([a, b]);
+  }
+
+  return hullSegments;
+}
+
+function collectUniquePoints(segments: Segments): Vector3[] {
+  const points: Vector3[] = [];
+  for (const [a, b] of segments) {
+    addUniqueIntersectionPoint(points, a);
+    addUniqueIntersectionPoint(points, b);
+  }
+  return points;
+}
+
+// Andrew's monotone chain algorithm, O(n log n). Operates on the X/Z coordinates only
+// (points are assumed to share a common Y, since they come from a horizontal plane cut).
+function computeConvexHullXZ(points: Vector3[]): Vector3[] {
+  const sorted = [...points].sort((p1, p2) => p1.x - p2.x || p1.z - p2.z);
+
+  // Cross product of (o -> a) and (o -> b) in the XZ plane. Positive means a->b turns left of o->a.
+  const cross = (o: Vector3, a: Vector3, b: Vector3): number =>
+    (a.x - o.x) * (b.z - o.z) - (a.z - o.z) * (b.x - o.x);
+
+  const lower: Vector3[] = [];
+  for (const p of sorted) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+      lower.pop();
+    }
+    lower.push(p);
+  }
+
+  const upper: Vector3[] = [];
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const p = sorted[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+      upper.pop();
+    }
+    upper.push(p);
+  }
+
+  // The last point of each half is the first point of the other half - drop the duplicates.
+  lower.pop();
+  upper.pop();
+
+  return lower.concat(upper);
 }
 
 function getWorldVertex(positions: FloatArray, vertexIndex: number, worldMatrix: Matrix): Vector3 {

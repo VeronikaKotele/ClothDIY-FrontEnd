@@ -8,7 +8,7 @@ import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { AxesViewer } from "@babylonjs/core/Debug/axesViewer.js";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
-import { computeHorizontalPlaneIntersectionSegments, segmentLength } from "./ComputationalGeometry.js";
+import { computeHorizontalPlaneIntersectionSegments, segmentLength, computeConvexHull, removeMedianCavitations } from "./ComputationalGeometry.js";
 
 const LOG_TAG = "[DebugSceneElements]";
 
@@ -71,10 +71,9 @@ export function createBodyDebugElements(scene: Scene,
     return boundingBoxLines;
 }
 
-export function createDebugHorizontalPlane(scene: Scene, height: number, model: Mesh, color: Color3 = Color3.White()): TransformNode {
+export function createDebugHorizontalPlane(
+    scene: Scene, height: number, model: Mesh, color: Color3, xSize: number, zSize: number): TransformNode {
     const parentNode = new TransformNode("debugHorizontalPlaneParent", scene);
-    const xSize = 30;
-    const zSize = 30;
     const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: xSize, height: zSize }, scene);
     plane.position = new Vector3(0, height, 0);
     plane.rotation = new Vector3(Math.PI / 2, 0, 0);
@@ -92,6 +91,8 @@ export function createDebugHorizontalPlane(scene: Scene, height: number, model: 
     // `model` is only the "Right" half of the (symmetric) body mesh, so double it to
     // approximate the full circumference at this height.
     const segments = computeHorizontalPlaneIntersectionSegments(model, height, xSize, zSize);
+    //const segments = computeConvexHull(exactSegments);
+    removeMedianCavitations(segments);
     let halfIntersectionLength = 0;
     for (const segment of segments) {
         halfIntersectionLength += segmentLength(segment);
