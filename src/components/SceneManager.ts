@@ -4,7 +4,7 @@ import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight.js";
 import type { ICamera, IBodyManager, ISceneManager, IBodyLoader } from "../interfaces/3dSceneInterfaces.js";
 import { DEFAULT_BODY_HEIGHT_CM } from "../constants.js";
-import { createSceneDebugElements, createBodyDebugElements } from "./DebugSceneElements.js";
+import { createSceneDebugElements } from "./DebugSceneElements.js";
 import { BodyLoader } from "./BodyLoader.js";
 import { BodyManager } from "./BodyManager.js";
 import { Camera } from "./Camera.js";
@@ -150,7 +150,6 @@ class SceneManager implements ISceneManager {
     }
 
     this.bodyManager = new BodyManager(bodyModel.modelRoot, bodyModel.bodyHeight, bodyModel.boundingBox);
-    createBodyDebugElements(this.scene!, bodyModel.boundingBox, bodyModel.modelRoot);
     
     return this.bodyManager;
   }

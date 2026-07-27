@@ -1,5 +1,6 @@
-import { BodyBuilderApp } from "./BodyBuilderApp.js";
+import "./scripts/uiControls.js"
 import "./scripts/bodyParametersForm.js";
+import { BodyBuilderApp } from "./BodyBuilderApp.js";
 
 const app = new BodyBuilderApp();
 

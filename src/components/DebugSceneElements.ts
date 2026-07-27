@@ -1,12 +1,13 @@
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import type { Scene } from "@babylonjs/core/scene.js";
+import type { LinesMesh } from "@babylonjs/core/Meshes/linesMesh.js";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial.js";
 import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture.js";
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { AxesViewer } from "@babylonjs/core/Debug/axesViewer.js";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
-import { BoundingInfo } from "@babylonjs/core/Culling/boundingInfo.js";
+import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
 
 export function createSceneDebugElements(scene: Scene)
 {
@@ -39,7 +40,7 @@ export function createSceneDebugElements(scene: Scene)
 
 export function createBodyDebugElements(scene: Scene,
     boundingBox: { min: Vector3; max: Vector3 },
-    modelRoot?: TransformNode)
+    modelRoot?: TransformNode): LinesMesh
 {
     const min = boundingBox.min;
     const max = boundingBox.max;
@@ -61,6 +62,19 @@ export function createBodyDebugElements(scene: Scene,
             [p010, p011], [p010, p110],
             [p100, p101], [p100, p110],
         ],
+        updatable: true,
     }, scene);
     boundingBoxLines.color = new Color3(1, 0, 0);
+
+    return boundingBoxLines;
+}
+
+export function createDebugHorizontalPlane(scene: Scene, height: number): Mesh {
+    const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: 30, height: 30 }, scene);
+    plane.position = new Vector3(0, height, 0);
+    plane.rotation = new Vector3(Math.PI / 2, 0, 0);
+    plane.visibility = 0.5;
+    plane.isPickable = false;
+
+    return plane;
 }

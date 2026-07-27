@@ -59,6 +59,7 @@ export function applyTargetHeight(node: TransformNode, targetHeight: number, bou
 
     const uniformScale = targetHeight / loadedBodyHeight;
     node.scaling = node.scaling.multiplyByFloats(uniformScale, uniformScale, uniformScale);
+    console.info(`${LOG_TAG} Model scaled by.`, {uniformScale, targetHeight, loadedBodyHeight});
 
     if (updatedBoundingBox) {
         boundingBox.min = boundsMin.scale(uniformScale);
