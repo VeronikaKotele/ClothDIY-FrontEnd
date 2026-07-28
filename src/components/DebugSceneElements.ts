@@ -18,6 +18,7 @@ export function createSceneDebugElements(scene: Scene)
     const axes = new AxesViewer(scene, 10);
     // 2. Ground plane
     const ground = MeshBuilder.CreateGround("ground", { width: 100, height: 100 }, scene);
+    ground.visibility = 0.1;
     // 3. Y dimension ruler
     const rulerY = MeshBuilder.CreateLines("rulerY", { points: [new Vector3(-50, 0, 0), new Vector3(-50, 200, 0)] }, scene);
     const rulerYText = MeshBuilder.CreatePlane("rulerYText", { width: 40, height: 10 }, scene);
@@ -26,7 +27,7 @@ export function createSceneDebugElements(scene: Scene)
 
     const rulerYTextTexture = new DynamicTexture("rulerYTextTexture", { width: 1024, height: 256 }, scene, true);
     rulerYTextTexture.hasAlpha = true;
-    rulerYTextTexture.drawText("Height in cm: 200", null, 180, "bold 96px Arial", "white", "transparent", true);
+    rulerYTextTexture.drawText("Висота в см: 200", null, 180, "bold 96px Arial", "white", "transparent", true);
 
     const rulerYTextMaterial = new StandardMaterial("rulerYTextMaterial", scene);
     rulerYTextMaterial.diffuseTexture = rulerYTextTexture;
@@ -66,18 +67,18 @@ export function createBodyDebugElements(scene: Scene,
             [p100, p101], [p100, p110],
         ],
     }, scene);
-    boundingBoxLines.color = new Color3(1, 0, 0);
+    boundingBoxLines.color = Color3.White();
 
     return boundingBoxLines;
 }
 
-export function createDebugHorizontalPlane(
+export function calculateCircumstance(
     scene: Scene, height: number, model: Mesh, color: Color3, xSize: number, zSize: number): TransformNode {
     const parentNode = new TransformNode("debugHorizontalPlaneParent", scene);
     const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: xSize, height: zSize }, scene);
     plane.position = new Vector3(0, height, 0);
     plane.rotation = new Vector3(Math.PI / 2, 0, 0);
-    plane.visibility = 0.5;
+    plane.visibility = 0.3;
     plane.parent = parentNode;
     const planeMaterial = new StandardMaterial("debugHorizontalPlaneMaterial", scene);
     planeMaterial.diffuseColor = color;
@@ -114,14 +115,14 @@ export function createDebugHorizontalPlane(
       circumference,
     });
 
-    const labelText = MeshBuilder.CreatePlane("debugHorizontalPlaneLabel", { width: 40, height: 10 }, scene);
-    labelText.position = new Vector3(30, height + 5, -20);
+    const labelText = MeshBuilder.CreatePlane("debugHorizontalPlaneLabel", { width: 30, height: 10 }, scene);
+    labelText.position = new Vector3(15, height + 5, -15);
     labelText.billboardMode = 7; // Make the label always face the camera
     labelText.parent = parentNode;
 
     const labelTexture = new DynamicTexture("debugHorizontalPlaneLabelTexture", { width: 400, height: 100 }, scene, true);
     labelTexture.hasAlpha = true;
-    labelTexture.drawText(`Circumference cm: ${circumference.toFixed(1)}`, null, 100, "bold 26px Arial", "white", "transparent", true);
+    labelTexture.drawText(`${circumference.toFixed(1)} см`, null, 100, "bold 26px Arial", "white", "transparent", true);
 
     const labelMaterial = new StandardMaterial("debugHorizontalPlaneLabelMaterial", scene);
     labelMaterial.diffuseTexture = labelTexture;

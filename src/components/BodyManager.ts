@@ -3,10 +3,11 @@ import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
 import { Color3 } from "@babylonjs/core/Maths/math.color.js";
 import { Material } from "@babylonjs/core/Materials/material.js";
+import { Space } from "@babylonjs/core/Maths/math.axis.js";
 
-import { applyTargetHeight, placeNodeOnOrigin } from "./3dTransformations.js";
+import { applyTargetHeight } from "./3dTransformations.js";
 import type { IBodyManager } from "../interfaces/3dSceneInterfaces.js";
-import { createBodyDebugElements, createDebugHorizontalPlane } from "./DebugSceneElements.js";
+import { createBodyDebugElements, calculateCircumstance } from "./DebugSceneElements.js";
 
 import * as Constants from "../constants.js";
 
@@ -66,13 +67,13 @@ export class BodyManager implements IBodyManager {
 
     console.info(`${LOG_TAG} Creating debug horizontal planes for bust measurements.`);
 
-    this.bustMidPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+    this.bustMidPlane = calculateCircumstance(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
       rightBodyPartMesh, Color3.Magenta(), 30, 30);
-    this.bustTopPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+    this.bustTopPlane = calculateCircumstance(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
       rightBodyPartMesh, Color3.Red(), 25, 25);
-    this.bustBottomPlane = createDebugHorizontalPlane(this.modelRoot.getScene(),
+    this.bustBottomPlane = calculateCircumstance(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
       rightBodyPartMesh, Color3.Blue(), 25, 25);
   }
@@ -91,9 +92,17 @@ export class BodyManager implements IBodyManager {
     }
 
     this.debugElements?.scaling.scaleInPlace(newHeight / this.bodyHeight);
-    this.bustMidPlane.translate(Vector3.Up(), deltaHeight);//.position.y = Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * newHeight;
-    this.bustTopPlane.translate(Vector3.Up(), deltaHeight);//.position.y = Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * newHeight;
-    this.bustBottomPlane.translate(Vector3.Up(), deltaHeight);//.position.y = Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * newHeight;
+    this.bustMidPlane.translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustTopPlane.translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustBottomPlane.translate(Vector3.Up(), deltaHeight, Space.WORLD);
+
+    // translate() updates .position immediately, but getWorldMatrix()/getAbsolutePosition()
+    // return a cached matrix keyed by the scene's renderId. Without forcing a recompute here,
+    // reading those values before the next render-loop tick would still return the pre-translate
+    // (stale) results.
+    this.bustMidPlane.computeWorldMatrix(true);
+    this.bustTopPlane.computeWorldMatrix(true);
+    this.bustBottomPlane.computeWorldMatrix(true);
 
     try {
       this.bodyHeight = newHeight;

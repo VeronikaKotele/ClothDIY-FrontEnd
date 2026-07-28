@@ -12,32 +12,32 @@
             <div class="canvas3DContainer">
                 <canvas id="bodyBuilderCanvas"></canvas>
                 <div class="canvas3DControls">
-                    <button id="resetCameraButton" class="transparentButton"  aria-label="Reset camera to default view">
+                    <button id="resetCameraButton" class="transparentButton"  aria-label="Скинути камеру до стандартного вигляду">
                         <svg class="icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/zoom-reset-svgrepo-com.svg#i-zoom-reset"></use>
                         </svg>
                     </button>
-                    <button id="camera-projection-mode" class="transparentButton" aria-label="Toggle Projection Mode: perspective or orthographic">
+                    <button id="camera-projection-mode" class="transparentButton" aria-label="Перемкнути режим проекції: перспективна або ортографічна">
                         <svg class="icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/projection.svg#i-projection"></use>
                         </svg>
                     </button>
-                    <button id="camera-position-top" class="transparentButton" aria-label="Look from top">
+                    <button id="camera-position-top" class="transparentButton" aria-label="Дивитися зверху">
                         <svg class="icon view-orientation-icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/cube.svg#i-cube"></use>
                         </svg>
                     </button>
-                    <button id="camera-position-front" class="transparentButton" aria-label="Look from front">
+                    <button id="camera-position-front" class="transparentButton" aria-label="Дивитися спереду">
                         <svg class="icon view-orientation-icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/cube.svg#i-cube"></use>
                         </svg>
                     </button>
-                    <button id="camera-position-side" class="transparentButton" aria-label="Look from side">
+                    <button id="camera-position-side" class="transparentButton" aria-label="Дивитися з боку">
                         <svg class="icon view-orientation-icon" width="30" height="30" aria-hidden="true" >
                             <use href="./public/icons/cube.svg#i-cube"></use>
                         </svg>
                     </button>
-                    <button id="openBodyInputsPannel" class="transparentButton" style="display: none;" aria-label="Open Body Inputs Pannel">
+                    <button id="openBodyInputsPannel" class="transparentButton" style="display: none;" aria-label="Відкрити панель введення параметрів тіла">
                         <svg class="icon" width="30" height="30" aria-hidden="true">
                             <use href="./public/icons/sliders.svg#i-slider"></use>
                         </svg>
@@ -46,21 +46,13 @@
             </div>
 
             <div class="inputsContainer" id="bodyInputsPannel">
-                <button id="closeBodyInputsPannel" class="toggleSidePannelButton" aria-label="Close Body Inputs Pannel">
+                <button id="closeBodyInputsPannel" class="toggleSidePannelButton" aria-label="Закрити панель введення параметрів тіла">
                     <svg class="icon" width="30" height="30" aria-hidden="true">
                         <use href="./public/icons/angles-right.svg#i-angles-right"></use>
                     </svg>
                 </button>
 
                 <div class="inputsContainerScrollArea">
-                    <!-- <div class="controlGroup">
-                        <label for="bodyTypeSelect">Body Type:</label>
-                        <select id="bodyTypeSelect">
-                            <option value="male">Male</option>
-                            <option value="female" selected>Female</option>
-                        </select>
-                    </div> -->
-
                     <form class="body-parameters-input-form" data-body-parameters-input-form>
                         <label class="" for="height">Висота</label>
                         <div class="input-with-unit">
@@ -91,52 +83,9 @@
                             <input class="" type="number" id="sleeve-length" name="sleeve-length" />
                             <span class="input-unit">cm</span>
                         </div>
-                        
-                        <!-- <label class="" for="neck-circumference">Neck Circumference</label>
-                        <input class="" type="number" id="neck-circumference" name="neck-circumference" />
-                        <label class="" for="high-bust-circumference">High Bust Circumference</label>
-                        <input class="" type="number" id="high-bust-circumference" name="high-bust-circumference" /> -->
-                        <!-- <label class="" for="underbust-circumference">Underbust Circumference</label>
-                        <input class="" type="number" id="underbust-circumference" name="underbust-circumference" /> -->
-                        <!--<label class="" for="high-hip-circumference">High Hip Circumference</label>
-                        <input class="" type="number" id="high-hip-circumference" name="high-hip-circumference" /> -->
-                        <!-- <label class="" for="abdomen-circumference">Abdomen Circumference</label>
-                        <input class="" type="number" id="abdomen-circumference" name="abdomen-circumference" />
-                        <label class="" for="upper-arm-circumference">Upper Arm Circumference (Biceps)</label>
-                        <input class="" type="number" id="upper-arm-circumference" name="upper-arm-circumference" />
-                        <label class="" for="thigh-circumference">Thigh Circumference</label>
-                        <input class="" type="number" id="thigh-circumference" name="thigh-circumference" />
-                        <label class="" for="knee-circumference">Knee Circumference</label>
-                        <input class="" type="number" id="knee-circumference" name="knee-circumference" /> -->
 
-                        <!-- <label class="" for="front-chest-length">Front Chest Length</label>
-                        <input class="" type="number" id="front-chest-length" name="front-chest-length" />
-
-                        <label class="" for="back-chest-length">Back Chest Length</label>
-                        <input class="" type="number" id="back-chest-length" name="back-chest-length" />
-
-                        <label class="" for="front-waist-length">Front Waist Length</label>
-                        <input class="" type="number" id="front-waist-length" name="front-waist-length" />
-
-                        <label class="" for="back-waist-length">Back Waist Length</label>
-                        <input class="" type="number" id="back-waist-length" name="back-waist-length" />
-
-                        <label class="" for="front-crotch-length">Front Crotch Length</label>
-                        <input class="" type="number" id="front-crotch-length" name="front-crotch-length" />
-
-                        <label class="" for="inseam-length">Inseam Length</label>
-                        <input class="" type="number" id="inseam-length" name="inseam-length" />
-
-                        <label class="" for="outseam-length">Outseam Length (Waist to Floor)</label>
-                        <input class="" type="number" id="outseam-length" name="outseam-length" />
-
-                        <label class="" for="skirt-length">Skirt Length</label>
-                        <input class="" type="number" id="skirt-length" name="skirt-length" /> -->
-
-
-
-                        <button class="search-formButton" type="submit" aria-label="Save">
-                            Save
+                        <button class="search-formButton" type="submit" disabled aria-label="Save">
+                            Зберегти
                         </button>
                     </form>
                 </div>
