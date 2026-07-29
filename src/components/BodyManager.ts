@@ -79,7 +79,7 @@ export class BodyManager implements IBodyManager {
   }
 
   public async updateHeight(newHeight: number): Promise<boolean> {
-    const deltaHeight = this.bodyHeight - newHeight;
+    const deltaHeight = newHeight - this.bodyHeight;
     if (Math.abs(deltaHeight) < MINIMAL_CHANGE_SENSITIVITY_CM) {
       return false; // No significant change, no update needed
     }
@@ -92,14 +92,18 @@ export class BodyManager implements IBodyManager {
     }
 
     this.debugElements?.scaling.scaleInPlace(newHeight / this.bodyHeight);
-    this.bustMidPlane.translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustTopPlane.translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustBottomPlane.translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustMidPlane.getChildMeshes()[0].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustTopPlane.getChildMeshes()[0].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustBottomPlane.getChildMeshes()[0].translate(Vector3.Up(), deltaHeight, Space.WORLD);
 
-    // translate() updates .position immediately, but getWorldMatrix()/getAbsolutePosition()
-    // return a cached matrix keyed by the scene's renderId. Without forcing a recompute here,
-    // reading those values before the next render-loop tick would still return the pre-translate
-    // (stale) results.
+    this.bustMidPlane.getChildMeshes()[1].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustTopPlane.getChildMeshes()[1].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustBottomPlane.getChildMeshes()[1].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+
+    this.bustMidPlane.getChildMeshes()[2].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustTopPlane.getChildMeshes()[2].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+    this.bustBottomPlane.getChildMeshes()[2].translate(Vector3.Up(), deltaHeight, Space.WORLD);
+
     this.bustMidPlane.computeWorldMatrix(true);
     this.bustTopPlane.computeWorldMatrix(true);
     this.bustBottomPlane.computeWorldMatrix(true);
