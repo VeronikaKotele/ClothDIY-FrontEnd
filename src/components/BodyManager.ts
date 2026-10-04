@@ -5,14 +5,10 @@ import { Color3, Color4 } from "@babylonjs/core/Maths/math.color.js";
 import { Material } from "@babylonjs/core/Materials/material.js";
 import { Space } from "@babylonjs/core/Maths/math.axis.js";
 import { EdgesRenderer } from "@babylonjs/core/Rendering/edgesRenderer.js";
+import { BodyMeasurements } from "../components/BodyMeasurements.js";
 
 import type { IBodyManager } from "../interfaces/3dSceneInterfaces.js";
-import {
-  createBodyDebugElements,
-  calculateCircumstance,
-} from "./DebugSceneElements.js";
-
-import * as Constants from "../constants.js";
+import { DebugElements } from "./DebugSceneElements.js";
 
 const LOG_TAG = "[BodyManager]";
 
@@ -23,12 +19,8 @@ export class BodyManager implements IBodyManager {
   private modelRoot: TransformNode;
   private bodyHeight: number;
   private boundingBox: { min: Vector3; max: Vector3 };
-
-  private debugElements: ReturnType<typeof createBodyDebugElements> | null =
-    null;
-  private bustMidPlane: TransformNode;
-  private bustTopPlane: TransformNode;
-  private bustBottomPlane: TransformNode;
+  private bodyMeasurements: BodyMeasurements | null = null;
+  private debugElements: DebugElements;
 
   constructor(
     model: TransformNode,
@@ -38,13 +30,48 @@ export class BodyManager implements IBodyManager {
     this.modelRoot = model;
     this.bodyHeight = bodyHeight;
     this.boundingBox = boundingBox;
-
-    this.debugElements = createBodyDebugElements(
-      this.modelRoot.getScene(),
-      boundingBox,
-      model,
+    this.bodyMeasurements = new BodyMeasurements(
+      this.bodyHeight,
+      this.modelRoot,
     );
 
+    this.debugElements = new DebugElements(
+      this.modelRoot.getScene(),
+      this.boundingBox,
+      this.bodyMeasurements,
+    );
+
+    this.makeTransparent();
+  }
+
+  public async updateHeight(newHeight: number): Promise<boolean> {
+    const deltaHeight = newHeight - this.bodyHeight;
+    if (Math.abs(deltaHeight) < MINIMAL_CHANGE_SENSITIVITY_CM) {
+      return false; // No significant change, no update needed
+    }
+
+    if (newHeight <= 100 || newHeight > 300) {
+      console.warn(`${LOG_TAG} Requested height is out of reasonable bounds.`, {
+        requestedHeight: newHeight,
+      });
+      return false; // Height out of reasonable bounds
+    }
+
+    try {
+      const scaleVector = new Vector3(1, newHeight / this.bodyHeight, 1);
+      this.modelRoot.scaling.multiplyInPlace(scaleVector);
+      this.debugElements?.boundingBoxLines.scaling.multiplyInPlace(scaleVector);
+      this.bodyHeight = newHeight;
+      this.boundingBox.max.y = this.bodyHeight;
+    } catch (error) {
+      console.error(`${LOG_TAG} Failed to update body height.`, error);
+      return false; // Update failed
+    }
+
+    return true; // Update applied successfully
+  }
+
+  private makeTransparent(): void {
     this.modelRoot.getChildMeshes().forEach((mesh) => {
       const edgesRenderer = new EdgesRenderer(mesh);
       mesh.enableEdgesRendering();
@@ -74,65 +101,6 @@ export class BodyManager implements IBodyManager {
         mesh.material.alpha = DEBUG_MODEL_ALPHA;
       }
     });
-    const rightBodyPartMesh = model.getChildren(
-      (child) => child instanceof Mesh && child.name.includes("Right"),
-      false,
-    )[0] as Mesh;
-
-    this.bustMidPlane = calculateCircumstance(
-      this.modelRoot.getScene(),
-      Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh,
-      Color3.Magenta(),
-      30,
-      30,
-    );
-    this.bustTopPlane = calculateCircumstance(
-      this.modelRoot.getScene(),
-      Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh,
-      Color3.Red(),
-      25,
-      25,
-    );
-    this.bustBottomPlane = calculateCircumstance(
-      this.modelRoot.getScene(),
-      Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh,
-      Color3.Blue(),
-      25,
-      25,
-    );
-
-    this.bustMidPlane.setParent(this.debugElements);
-    this.bustTopPlane.setParent(this.debugElements);
-    this.bustBottomPlane.setParent(this.debugElements);
-  }
-
-  public async updateHeight(newHeight: number): Promise<boolean> {
-    const deltaHeight = newHeight - this.bodyHeight;
-    if (Math.abs(deltaHeight) < MINIMAL_CHANGE_SENSITIVITY_CM) {
-      return false; // No significant change, no update needed
-    }
-
-    if (newHeight <= 100 || newHeight > 300) {
-      console.warn(`${LOG_TAG} Requested height is out of reasonable bounds.`, {
-        requestedHeight: newHeight,
-      });
-      return false; // Height out of reasonable bounds
-    }
-
-    try {
-      const scalevector = new Vector3(1, newHeight / this.bodyHeight, 1);
-      this.modelRoot.scaling.multiplyInPlace(scalevector);
-      this.debugElements?.scaling.multiplyInPlace(scalevector);
-      this.bodyHeight = newHeight;
-      this.boundingBox.max.y = this.bodyHeight;
-    } catch (error) {
-      console.error(`${LOG_TAG} Failed to update body height.`, error);
-      return false; // Update failed
-    }
-
-    return true; // Update applied successfully
   }
 }
+

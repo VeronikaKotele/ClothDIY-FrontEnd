@@ -7,7 +7,7 @@ export interface IBodyManager {
 export interface ISceneManager {
   resetCamera(): void;
   getBodyManager(): IBodyManager | null;
-  setCameraPosition(position: 'top' | 'front' | 'side'): void;
+  setCameraPosition(position: "top" | "front" | "side"): void;
   toggleProjectionMode(): void;
 }
 
@@ -20,5 +20,5 @@ export interface ICamera {
   resetCamera(): void;
   attachControl(canvas: HTMLCanvasElement, noPreventDefault?: boolean): void;
   toggleProjectionMode(): void;
-  setPosition(position: 'top' | 'front' | 'side'): void;
+  setPosition(position: "top" | "front" | "side"): void;
 }

@@ -2,15 +2,13 @@ import { Vector3, type Matrix } from "@babylonjs/core/Maths/math.vector.js";
 import type { Mesh } from "@babylonjs/core/Meshes/mesh.js";
 import { VertexBuffer } from "@babylonjs/core/Buffers/buffer.js";
 import type { FloatArray } from "@babylonjs/core/types.js";
+import { Circumstance, Plane, Segment, Segments } from "../interfaces/structures.js";
 
 const LOG_TAG = "[ComputationalGeometry]";
 
 // Tolerance (in world units) used when comparing a vertex's height to the plane height,
 // and when deduplicating intersection points that fall on a shared triangle vertex.
 const PLANE_INTERSECTION_EPSILON = 1e-5;
-
-type Segment = [Vector3, Vector3];
-type Segments = Segment[];
 
 /**
  * Find all the segment(s) formed by intersecting a mesh with a
@@ -20,16 +18,22 @@ type Segments = Segment[];
  * The mesh is walked triangle-by-triangle in world space; each triangle contributes at
  * most one intersection segment, and the segments' lengths are summed.
  */
-export function computeHorizontalPlaneIntersectionSegments(mesh: Mesh, planeHeightY: number, xSize: number, zSize: number)
-  : Segments
-{
+export function computeHorizontalPlaneIntersectionSegments(
+  mesh: Mesh,
+  planeHeightY: number,
+  xSize: number,
+  zSize: number,
+): Segments {
   const positions = mesh.getVerticesData(VertexBuffer.PositionKind);
   const indices = mesh.getIndices();
 
   if (!positions || !indices) {
-    console.warn(`${LOG_TAG} Mesh has no position/index data for intersection calculation.`, {
-      meshName: mesh.name,
-    });
+    console.warn(
+      `${LOG_TAG} Mesh has no position/index data for intersection calculation.`,
+      {
+        meshName: mesh.name,
+      },
+    );
     return [];
   }
 
@@ -43,7 +47,14 @@ export function computeHorizontalPlaneIntersectionSegments(mesh: Mesh, planeHeig
     const v1 = getWorldVertex(positions, indices[i + 1], worldMatrix);
     const v2 = getWorldVertex(positions, indices[i + 2], worldMatrix);
 
-    const segment = getTrianglePlaneIntersectionSegment(v0, v1, v2, planeHeightY, xSize, zSize);
+    const segment = getTrianglePlaneIntersectionSegment(
+      v0,
+      v1,
+      v2,
+      planeHeightY,
+      xSize,
+      zSize,
+    );
     if (segment) {
       segments.push(segment);
     }
@@ -80,26 +91,32 @@ export function removeMedianCavitations(segments: Segments) {
 
   for (const [start, end] of segments) {
     if (start.z < 0 && end.z < 0) {
-      if (start.x < mostFrontPoint.x && // median to the most front point
-        start.z > mostFrontPoint.z) // caviates
+      if (
+        start.x < mostFrontPoint.x && // median to the most front point
+        start.z > mostFrontPoint.z
+      ) // caviates
       {
         start.z = mostFrontPoint.z;
       }
-      if (end.x < mostFrontPoint.x && // median to the most front point
-        end.z > mostFrontPoint.z) // caviates
+      if (
+        end.x < mostFrontPoint.x && // median to the most front point
+        end.z > mostFrontPoint.z
+      ) // caviates
       {
         end.z = mostFrontPoint.z;
       }
-    }
-    else if (start.z > 0 && end.z > 0)
-    {
-      if (start.x < mostBackPoint.x && // median to the most back point
-        start.z < mostBackPoint.z) // caviates
+    } else if (start.z > 0 && end.z > 0) {
+      if (
+        start.x < mostBackPoint.x && // median to the most back point
+        start.z < mostBackPoint.z
+      ) // caviates
       {
         start.z = mostBackPoint.z;
       }
-      if (end.x < mostBackPoint.x && // median to the most back point
-        end.z < mostBackPoint.z) // caviates
+      if (
+        end.x < mostBackPoint.x && // median to the most back point
+        end.z < mostBackPoint.z
+      ) // caviates
       {
         end.z = mostBackPoint.z;
       }
@@ -162,7 +179,10 @@ function computeConvexHullXZ(points: Vector3[]): Vector3[] {
 
   const lower: Vector3[] = [];
   for (const p of sorted) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+    while (
+      lower.length >= 2 &&
+      cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0
+    ) {
       lower.pop();
     }
     lower.push(p);
@@ -171,7 +191,10 @@ function computeConvexHullXZ(points: Vector3[]): Vector3[] {
   const upper: Vector3[] = [];
   for (let i = sorted.length - 1; i >= 0; i--) {
     const p = sorted[i];
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+    while (
+      upper.length >= 2 &&
+      cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0
+    ) {
       upper.pop();
     }
     upper.push(p);
@@ -184,9 +207,17 @@ function computeConvexHullXZ(points: Vector3[]): Vector3[] {
   return lower.concat(upper);
 }
 
-function getWorldVertex(positions: FloatArray, vertexIndex: number, worldMatrix: Matrix): Vector3 {
+function getWorldVertex(
+  positions: FloatArray,
+  vertexIndex: number,
+  worldMatrix: Matrix,
+): Vector3 {
   const offset = vertexIndex * 3;
-  const localPosition = new Vector3(positions[offset], positions[offset + 1], positions[offset + 2]);
+  const localPosition = new Vector3(
+    positions[offset],
+    positions[offset + 1],
+    positions[offset + 2],
+  );
   return Vector3.TransformCoordinates(localPosition, worldMatrix);
 }
 
@@ -198,7 +229,7 @@ function getTrianglePlaneIntersectionSegment(
   v2: Vector3,
   planeY: number,
   xSize: number,
-  zSize: number
+  zSize: number,
 ): [Vector3, Vector3] | null {
   for (const v of [v0, v1, v2]) {
     if (!isWithinXZBounds(v, xSize / 2, zSize / 2)) {
@@ -238,14 +269,47 @@ function getTrianglePlaneIntersectionSegment(
 }
 
 function isWithinXZBounds(point: Vector3, xMax: number, yMax: number): boolean {
-  return point.x >= -xMax && point.x <= xMax && point.z >= -yMax && point.z <= yMax;
+  return (
+    point.x >= -xMax && point.x <= xMax && point.z >= -yMax && point.z <= yMax
+  );
 }
 
 function addUniqueIntersectionPoint(points: Vector3[], point: Vector3) {
   const isDuplicate = points.some(
-    (existing) => Vector3.DistanceSquared(existing, point) < PLANE_INTERSECTION_EPSILON * PLANE_INTERSECTION_EPSILON,
+    (existing) =>
+      Vector3.DistanceSquared(existing, point) <
+      PLANE_INTERSECTION_EPSILON * PLANE_INTERSECTION_EPSILON,
   );
   if (!isDuplicate) {
     points.push(point);
   }
+}
+
+// Calculate the length of intersection between the plane and the model mesh.
+// `halfModel` is only the "Right" half of the (symmetric) body mesh, so double it to
+// approximate the full circumference at this height.
+export function calculateCircumstance(
+  halfModel: Mesh,
+  plane: Plane,
+): Circumstance {
+  const segments: Segments = computeHorizontalPlaneIntersectionSegments(
+    halfModel,
+    plane.pivotPoint.y,
+    plane.size.a,
+    plane.size.b,
+  );
+
+  removeMedianCavitations(segments);
+
+  let halfIntersectionLength = 0;
+  for (const segment of segments) {
+    halfIntersectionLength += segmentLength(segment);
+  }
+  const circumference = halfIntersectionLength * 2;
+
+  return {
+    cuttingPlane: plane,
+    circumference,
+    segments,
+  };
 }
