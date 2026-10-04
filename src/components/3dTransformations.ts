@@ -59,15 +59,10 @@ export function applyTargetHeight(node: TransformNode, targetHeight: number, bou
 
     const uniformScale = targetHeight / loadedBodyHeight;
     node.scaling = node.scaling.multiplyByFloats(uniformScale, uniformScale, uniformScale);
-    console.info(`${LOG_TAG} Model scaled by.`, {uniformScale, targetHeight, loadedBodyHeight});
 
     if (updatedBoundingBox) {
         boundingBox.min = boundsMin.scale(uniformScale);
         boundingBox.max = boundsMax.scale(uniformScale);
-
-        console.info(`${LOG_TAG} Model bounding box recalculated.`, {
-          boundingBox,
-        });
     }
 }
 
@@ -82,8 +77,5 @@ export function placeNodeOnOrigin(node: TransformNode, boundingBox?:{ min: Vecto
     if (updatedBoundingBox) {
         boundingBox.min.y = 0;
         boundingBox.max.y -= extraHeight;
-        console.info(`${LOG_TAG} Model bounding box recalculated.`, {
-          boundingBox,
-        });
     }
 }

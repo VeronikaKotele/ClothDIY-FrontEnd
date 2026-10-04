@@ -7,7 +7,6 @@ import type { IBodyLoader } from "../interfaces/3dSceneInterfaces.js";
 import type { BodyModel } from "../interfaces/structures.js";
 
 const LOG_TAG = "[BodyLoader]";
-console.info(`${LOG_TAG} App bootstrap started.`);
 
 export class BodyLoader implements IBodyLoader {
   private scene: Scene;
@@ -54,7 +53,6 @@ export class BodyLoader implements IBodyLoader {
 
   public getBodyModel(): BodyModel | null {
     if (!this.modelRoot || !this.boundingBox) {
-      console.warn(`${LOG_TAG} Body model is not loaded yet.`);
       return null;
     }
 
@@ -69,7 +67,6 @@ export class BodyLoader implements IBodyLoader {
     console.info(`${LOG_TAG} loadModel started.`);
     const root = await this.loadBodyModel();
     if (!root) {
-      console.error(`${LOG_TAG} loadBodyModel returned null or undefined.`);
       return;
     }
     this.modelRoot = root;
@@ -88,16 +85,7 @@ export class BodyLoader implements IBodyLoader {
 
     const modelUrl = new URL("3dModels/body-compressed.glb", document.baseURI).toString();
 
-    console.info(`${LOG_TAG} ImportMeshAsync request.`, { modelUrl });
     const bodyMeshes = await ImportMeshAsync(modelUrl, this.scene);
-    console.info(`${LOG_TAG} ImportMeshAsync response.`, {
-      meshCount: bodyMeshes.meshes.length,
-      meshNames: bodyMeshes.meshes.map((mesh) => mesh.name),
-    });
-    if (bodyMeshes.meshes.length === 0) {
-      console.error("Loaded meshes:", bodyMeshes.meshes.map(mesh => mesh.name));
-      throw new Error("Expected at least one mesh for the body model, got 0");
-    }
 
     const root = new TransformNode("bodyRoot", this.scene);
 
@@ -114,10 +102,8 @@ export class BodyLoader implements IBodyLoader {
   }
 
   private async ensureGltfLoader(): Promise<void> {
-    console.info(`${LOG_TAG} Loading glTF loader chunk...`);
     try {
       await import("@babylonjs/loaders/glTF/2.0/index.js");
-      console.info(`${LOG_TAG} glTF loader chunk loaded.`);
     } catch (error) {
       console.error(`${LOG_TAG} Failed to load glTF loader chunk.`, error);
       throw error;

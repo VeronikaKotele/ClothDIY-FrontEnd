@@ -109,12 +109,6 @@ export function calculateCircumstance(
     segmentsLines.color = color;
     segmentsLines.parent = parentNode;
 
-    console.info(`${LOG_TAG} Computed horizontal plane intersection.`, {
-      height,
-      halfIntersectionLength,
-      circumference,
-    });
-
     const labelText = MeshBuilder.CreatePlane("debugHorizontalPlaneLabel", { width: 30, height: 10 }, scene);
     labelText.position = new Vector3(15, height + 5, -15);
     labelText.billboardMode = 7; // Make the label always face the camera

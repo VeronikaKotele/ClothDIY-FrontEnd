@@ -1,9 +1,10 @@
 import { Vector3 } from "@babylonjs/core/Maths/math.vector.js";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
 import { Mesh } from "@babylonjs/core/Meshes/mesh.js";
-import { Color3 } from "@babylonjs/core/Maths/math.color.js";
+import { Color3, Color4 } from "@babylonjs/core/Maths/math.color.js";
 import { Material } from "@babylonjs/core/Materials/material.js";
 import { Space } from "@babylonjs/core/Maths/math.axis.js";
+import { EdgesRenderer } from "@babylonjs/core/Rendering/edgesRenderer.js";
 
 import { applyTargetHeight } from "./3dTransformations.js";
 import type { IBodyManager } from "../interfaces/3dSceneInterfaces.js";
@@ -12,7 +13,6 @@ import { createBodyDebugElements, calculateCircumstance } from "./DebugSceneElem
 import * as Constants from "../constants.js";
 
 const LOG_TAG = "[BodyManager]";
-console.info(`${LOG_TAG} App bootstrap started.`);
 
 const MINIMAL_CHANGE_SENSITIVITY_CM = 1; // Minimum change in centimeters to trigger an update
 const DEBUG_MODEL_ALPHA = 0.3;
@@ -35,10 +35,18 @@ export class BodyManager implements IBodyManager {
     this.debugElements = createBodyDebugElements(this.modelRoot.getScene(), boundingBox, model);
 
     this.modelRoot.getChildMeshes().forEach(mesh => {
+      const edgesRenderer = new EdgesRenderer(mesh);
+      mesh.enableEdgesRendering();
+      mesh.edgesWidth = 4.0;
+      mesh.edgesColor = new Color4(0, 0, 1, DEBUG_MODEL_ALPHA);
+      // mesh.edgesShareWithInstances = true;
+      // mesh.alphaIndex = 1;
+      // mesh.renderingGroupId = 1;
+
       // For transparent meshes, set material alpha instead of mesh.hasVertexAlpha.
       // hasVertexAlpha expects per-vertex alpha data and can produce washed-out results.
-      mesh.hasVertexAlpha = false;
-      mesh.visibility = 1;
+      // mesh.hasVertexAlpha = false;
+      // mesh.visibility = 1;
 
       const material = mesh.material;
       if (material) {
@@ -53,19 +61,13 @@ export class BodyManager implements IBodyManager {
         }
       } else {
         // Fallback when a mesh has no material assigned.
-        mesh.visibility = DEBUG_MODEL_ALPHA;
+        // mesh.visibility = DEBUG_MODEL_ALPHA;
+        mesh.material = new Material("defaultTransparentMaterial", this.modelRoot.getScene());
+        mesh.material.alpha = DEBUG_MODEL_ALPHA;
       }
-
-      console.debug(`${LOG_TAG} Set mesh transparency for debug visualization.`, {
-        meshName: mesh.name,
-        materialName: material?.name,
-        alpha: material?.alpha,
-      });
     });
     const rightBodyPartMesh = model.getChildren((child) => 
       child instanceof Mesh && child.name.includes("Right"), false)[0] as Mesh;
-
-    console.info(`${LOG_TAG} Creating debug horizontal planes for bust measurements.`);
 
     this.bustMidPlane = calculateCircumstance(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
@@ -76,6 +78,10 @@ export class BodyManager implements IBodyManager {
     this.bustBottomPlane = calculateCircumstance(this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
       rightBodyPartMesh, Color3.Blue(), 25, 25);
+
+    this.bustMidPlane.setParent(this.debugElements);
+    this.bustTopPlane.setParent(this.debugElements);
+    this.bustBottomPlane.setParent(this.debugElements);
   }
 
   public async updateHeight(newHeight: number): Promise<boolean> {
@@ -92,21 +98,6 @@ export class BodyManager implements IBodyManager {
     }
 
     this.debugElements?.scaling.scaleInPlace(newHeight / this.bodyHeight);
-    this.bustMidPlane.getChildMeshes()[0].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustTopPlane.getChildMeshes()[0].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustBottomPlane.getChildMeshes()[0].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-
-    this.bustMidPlane.getChildMeshes()[1].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustTopPlane.getChildMeshes()[1].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustBottomPlane.getChildMeshes()[1].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-
-    this.bustMidPlane.getChildMeshes()[2].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustTopPlane.getChildMeshes()[2].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-    this.bustBottomPlane.getChildMeshes()[2].translate(Vector3.Up(), deltaHeight, Space.WORLD);
-
-    this.bustMidPlane.computeWorldMatrix(true);
-    this.bustTopPlane.computeWorldMatrix(true);
-    this.bustBottomPlane.computeWorldMatrix(true);
 
     try {
       this.bodyHeight = newHeight;

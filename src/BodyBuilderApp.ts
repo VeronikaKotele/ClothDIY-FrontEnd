@@ -1,4 +1,7 @@
-import type { IBodyManager, ISceneManager } from "./interfaces/3dSceneInterfaces.js";
+import type {
+  IBodyManager,
+  ISceneManager,
+} from "./interfaces/3dSceneInterfaces.js";
 import { AppState } from "./state.js";
 
 export class BodyBuilderApp {
@@ -9,16 +12,16 @@ export class BodyBuilderApp {
   private appState = new AppState();
 
   constructor() {
-    const canvas = document.getElementById('bodyBuilderCanvas');
+    const canvas = document.getElementById("bodyBuilderCanvas");
     if (canvas instanceof HTMLCanvasElement) {
       this.initializeSceneAsync(canvas);
     } else {
       console.error("Canvas element not found or is not a HTMLCanvasElement.");
     }
 
-    const resetCameraButton = document.getElementById('resetCameraButton');
+    const resetCameraButton = document.getElementById("resetCameraButton");
     if (resetCameraButton instanceof HTMLButtonElement) {
-      resetCameraButton.addEventListener('click', () => {
+      resetCameraButton.addEventListener("click", () => {
         if (this.sceneManager) {
           this.sceneManager.resetCamera();
         }
@@ -35,25 +38,35 @@ export class BodyBuilderApp {
 
     const loadScene = async () => {
       try {
-        console.info("[BodyBuilderApp] Loading Babylon scene module...");
         const { load3DScene } = await import("./components/SceneManager.js");
         this.sceneManager = load3DScene(canvas);
         await this.waitForBodyManagerReady();
       } catch (error) {
-        console.error("[BodyBuilderApp] Failed to load Babylon scene module.", error);
+        console.error(
+          "[BodyBuilderApp] Failed to load Babylon scene module.",
+          error,
+        );
       } finally {
         this.isSceneLoading = false;
       }
     };
 
-    const idleCallback = (window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-    }).requestIdleCallback;
+    const idleCallback = (
+      window as Window & {
+        requestIdleCallback?: (
+          cb: () => void,
+          opts?: { timeout: number },
+        ) => number;
+      }
+    ).requestIdleCallback;
 
     if (idleCallback) {
-      idleCallback(() => {
-        void loadScene();
-      }, { timeout: 700 });
+      idleCallback(
+        () => {
+          void loadScene();
+        },
+        { timeout: 700 },
+      );
     } else {
       window.setTimeout(() => {
         void loadScene();
@@ -68,7 +81,6 @@ export class BodyBuilderApp {
       const bodyManager = this.sceneManager?.getBodyManager() ?? null;
       if (bodyManager) {
         this.bodyManager = bodyManager;
-        console.info("[BodyBuilderApp] BodyManager is ready.");
         return;
       }
 
@@ -77,9 +89,12 @@ export class BodyBuilderApp {
       });
     }
 
-    console.warn("[BodyBuilderApp] BodyManager did not become ready before timeout.", {
-      timeoutMs,
-    });
+    console.warn(
+      "[BodyBuilderApp] BodyManager did not become ready before timeout.",
+      {
+        timeoutMs,
+      },
+    );
   }
 
   public async onBodyHeightChanged(newHeight: number): Promise<void> {
@@ -90,18 +105,19 @@ export class BodyBuilderApp {
       return;
     }
 
-    this.bodyManager.updateHeight(newHeight)
-    .then((result: boolean) => {
-      if (result) {
-        console.info("[BodyBuilderApp] Body height changed to:", newHeight);
-      }
-    })
-    .catch((error) => {
-      console.error("[BodyBuilderApp] Failed to update body height:", error);
-    });
+    this.bodyManager
+      .updateHeight(newHeight)
+      .then((result: boolean) => {
+        if (result) {
+          console.info("[BodyBuilderApp] Body height changed to:", newHeight);
+        }
+      })
+      .catch((error) => {
+        console.error("[BodyBuilderApp] Failed to update body height:", error);
+      });
   }
 
-  public OnToggleCameraPosition(position: 'top' | 'front' | 'side') {
+  public OnToggleCameraPosition(position: "top" | "front" | "side") {
     if (!this.sceneManager) {
       console.warn("[BodyBuilderApp] Camera is not initialized yet.");
       return;

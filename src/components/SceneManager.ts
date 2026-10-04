@@ -10,7 +10,6 @@ import { BodyManager } from "./BodyManager.js";
 import { Camera } from "./Camera.js";
 
 const LOG_TAG = "[SceneManager]";
-console.info(`${LOG_TAG} App bootstrap started.`);
 
 class SceneManager implements ISceneManager {
   private static globalErrorHooksRegistered = false;
@@ -28,17 +27,13 @@ class SceneManager implements ISceneManager {
   constructor(canvas: HTMLCanvasElement, targetSceneHeight?: number) {
     this.canvas = canvas;
     this.engine = new Engine(this.canvas, true, undefined, true);
-    console.info(`${LOG_TAG} Engine created.`, {
-      baseURI: document.baseURI,
-      canvasSize: `${canvas.clientWidth}x${canvas.clientHeight}`,
-    });
+
     this.registerGlobalErrorHooks();
     if (targetSceneHeight !== undefined) {
       this.targetSceneHeight = targetSceneHeight;
     }
 
     this.setupResizeObserver();
-
   }
 
   public resetCamera() {
@@ -62,13 +57,11 @@ class SceneManager implements ISceneManager {
   }
 
   private async createScene(): Promise<Scene> {
-    console.info(`${LOG_TAG} createScene started.`);
     const scene = new Scene(this.engine);
     
     this.createCamera(scene);
     this.createLight(scene);
     this.scene = scene;
-    console.info(`${LOG_TAG} Scene created.`);
 
     createSceneDebugElements(scene);
 
@@ -136,7 +129,6 @@ class SceneManager implements ISceneManager {
   }
 
   async init(): Promise<void> {
-    console.info(`${LOG_TAG} init started.`);
     const scene = await this.createScene();
 
     window.addEventListener("resize", () => {
@@ -147,7 +139,6 @@ class SceneManager implements ISceneManager {
     this.engine.runRenderLoop(() => {
       scene.render();
     });
-    console.info(`${LOG_TAG} render loop started.`);
 
     this.bodyLoader = new BodyLoader(scene, DEFAULT_BODY_HEIGHT_CM);
     this.bodyLoader.startModelLoad();
@@ -160,7 +151,6 @@ class SceneManager implements ISceneManager {
 
     const bodyModel = this.bodyLoader?.getBodyModel();
     if (!bodyModel) {
-      console.warn(`${LOG_TAG} Body model is not loaded yet.`);
       return null;
     }
 
