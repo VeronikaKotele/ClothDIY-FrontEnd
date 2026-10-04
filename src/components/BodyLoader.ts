@@ -2,7 +2,7 @@ import { Vector3, Quaternion } from "@babylonjs/core/Maths/math.vector.js";
 import { Scene } from "@babylonjs/core/scene.js";
 import { ImportMeshAsync } from "@babylonjs/core/Loading/sceneLoader.js";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode.js";
-import { getMeshesBoundingBox, applyTargetHeight, placeNodeOnOrigin } from "./3dTransformations.js";
+import { getMeshesBoundingBox } from "./3dTransformations.js";
 import type { IBodyLoader } from "../interfaces/3dSceneInterfaces.js";
 import type { BodyModel } from "../interfaces/structures.js";
 
@@ -15,8 +15,12 @@ export class BodyLoader implements IBodyLoader {
   private boundingBox: { min: Vector3; max: Vector3 } | null = null;
 
   private _state: "not_loaded" | "loading" | "loaded" = "not_loaded";
-  public get state() { return this._state; }
-  private set state(value) { this._state = value; }
+  public get state() {
+    return this._state;
+  }
+  private set state(value) {
+    this._state = value;
+  }
 
   constructor(scene: Scene, targetModelHeight: number) {
     this.scene = scene;
@@ -29,10 +33,13 @@ export class BodyLoader implements IBodyLoader {
     const loadStart = performance.now();
     const watchdogMs = 10000;
     const watchdog = window.setTimeout(() => {
-      console.error(`${LOG_TAG} Model load watchdog timeout after ${watchdogMs}ms.`, {
-        hint: "Check Network for missing js chunks and 3dModels/*",
-        baseURI: document.baseURI,
-      });
+      console.error(
+        `${LOG_TAG} Model load watchdog timeout after ${watchdogMs}ms.`,
+        {
+          hint: "Check Network for missing js chunks and 3dModels/*",
+          baseURI: document.baseURI,
+        },
+      );
     }, watchdogMs);
 
     // Defer model loading until after first paint so the page remains interactive.
@@ -71,19 +78,31 @@ export class BodyLoader implements IBodyLoader {
     }
     this.modelRoot = root;
 
-    this.boundingBox = getMeshesBoundingBox(root);
+    const boundingBox = getMeshesBoundingBox(root);
+    const modelHeight = boundingBox.max.y - boundingBox.min.y;
+    const uniformScale = this.bodyHeight / modelHeight;
 
-    applyTargetHeight(root, this.bodyHeight, this.boundingBox);
+    this.modelRoot.position.y -= boundingBox.min.y;
+    this.modelRoot.scaling = this.modelRoot.scaling.scale(uniformScale);
 
-    placeNodeOnOrigin(root, this.boundingBox);
+    // Adjust the bounding box to reflect the applied uniform scale and placement on origin.
+    this.boundingBox = boundingBox;
+    this.boundingBox.min.scaleInPlace(uniformScale);
+    this.boundingBox.max.scaleInPlace(uniformScale);
+    // Move up on zero plane
+    this.boundingBox.min.y = 0;
+    this.boundingBox.max.y = this.bodyHeight;
 
     this.state = "loaded";
   }
 
-  private async loadBodyModel() : Promise<TransformNode> {
+  private async loadBodyModel(): Promise<TransformNode> {
     await this.ensureGltfLoader();
 
-    const modelUrl = new URL("3dModels/body-compressed.glb", document.baseURI).toString();
+    const modelUrl = new URL(
+      "3dModels/body-compressed.glb",
+      document.baseURI,
+    ).toString();
 
     const bodyMeshes = await ImportMeshAsync(modelUrl, this.scene);
 

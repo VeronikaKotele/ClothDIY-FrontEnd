@@ -6,9 +6,11 @@ import { Material } from "@babylonjs/core/Materials/material.js";
 import { Space } from "@babylonjs/core/Maths/math.axis.js";
 import { EdgesRenderer } from "@babylonjs/core/Rendering/edgesRenderer.js";
 
-import { applyTargetHeight } from "./3dTransformations.js";
 import type { IBodyManager } from "../interfaces/3dSceneInterfaces.js";
-import { createBodyDebugElements, calculateCircumstance } from "./DebugSceneElements.js";
+import {
+  createBodyDebugElements,
+  calculateCircumstance,
+} from "./DebugSceneElements.js";
 
 import * as Constants from "../constants.js";
 
@@ -22,62 +24,85 @@ export class BodyManager implements IBodyManager {
   private bodyHeight: number;
   private boundingBox: { min: Vector3; max: Vector3 };
 
-  private debugElements: ReturnType<typeof createBodyDebugElements> | null = null;
+  private debugElements: ReturnType<typeof createBodyDebugElements> | null =
+    null;
   private bustMidPlane: TransformNode;
   private bustTopPlane: TransformNode;
   private bustBottomPlane: TransformNode;
 
-  constructor(model: TransformNode, bodyHeight: number, boundingBox: { min: Vector3; max: Vector3 }) {
+  constructor(
+    model: TransformNode,
+    bodyHeight: number,
+    boundingBox: { min: Vector3; max: Vector3 },
+  ) {
     this.modelRoot = model;
     this.bodyHeight = bodyHeight;
     this.boundingBox = boundingBox;
 
-    this.debugElements = createBodyDebugElements(this.modelRoot.getScene(), boundingBox, model);
+    this.debugElements = createBodyDebugElements(
+      this.modelRoot.getScene(),
+      boundingBox,
+      model,
+    );
 
-    this.modelRoot.getChildMeshes().forEach(mesh => {
+    this.modelRoot.getChildMeshes().forEach((mesh) => {
       const edgesRenderer = new EdgesRenderer(mesh);
       mesh.enableEdgesRendering();
       mesh.edgesWidth = 4.0;
       mesh.edgesColor = new Color4(0, 0, 1, DEBUG_MODEL_ALPHA);
-      // mesh.edgesShareWithInstances = true;
-      // mesh.alphaIndex = 1;
-      // mesh.renderingGroupId = 1;
-
-      // For transparent meshes, set material alpha instead of mesh.hasVertexAlpha.
-      // hasVertexAlpha expects per-vertex alpha data and can produce washed-out results.
-      // mesh.hasVertexAlpha = false;
-      // mesh.visibility = 1;
 
       const material = mesh.material;
       if (material) {
         material.alpha = DEBUG_MODEL_ALPHA;
 
         if ("transparencyMode" in material) {
-          (material as Material & { transparencyMode: number }).transparencyMode = Material.MATERIAL_ALPHABLEND;
+          (
+            material as Material & { transparencyMode: number }
+          ).transparencyMode = Material.MATERIAL_ALPHABLEND;
         }
 
         if ("needDepthPrePass" in material) {
-          (material as Material & { needDepthPrePass: boolean }).needDepthPrePass = true;
+          (
+            material as Material & { needDepthPrePass: boolean }
+          ).needDepthPrePass = true;
         }
       } else {
-        // Fallback when a mesh has no material assigned.
-        // mesh.visibility = DEBUG_MODEL_ALPHA;
-        mesh.material = new Material("defaultTransparentMaterial", this.modelRoot.getScene());
+        mesh.material = new Material(
+          "defaultTransparentMaterial",
+          this.modelRoot.getScene(),
+        );
         mesh.material.alpha = DEBUG_MODEL_ALPHA;
       }
     });
-    const rightBodyPartMesh = model.getChildren((child) => 
-      child instanceof Mesh && child.name.includes("Right"), false)[0] as Mesh;
+    const rightBodyPartMesh = model.getChildren(
+      (child) => child instanceof Mesh && child.name.includes("Right"),
+      false,
+    )[0] as Mesh;
 
-    this.bustMidPlane = calculateCircumstance(this.modelRoot.getScene(),
+    this.bustMidPlane = calculateCircumstance(
+      this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_MID_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh, Color3.Magenta(), 30, 30);
-    this.bustTopPlane = calculateCircumstance(this.modelRoot.getScene(),
+      rightBodyPartMesh,
+      Color3.Magenta(),
+      30,
+      30,
+    );
+    this.bustTopPlane = calculateCircumstance(
+      this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh, Color3.Red(), 25, 25);
-    this.bustBottomPlane = calculateCircumstance(this.modelRoot.getScene(),
+      rightBodyPartMesh,
+      Color3.Red(),
+      25,
+      25,
+    );
+    this.bustBottomPlane = calculateCircumstance(
+      this.modelRoot.getScene(),
       Constants.MODEL_LOAD_BUST_BOTTOM_LINE_REL_HEIGHT * this.bodyHeight,
-      rightBodyPartMesh, Color3.Blue(), 25, 25);
+      rightBodyPartMesh,
+      Color3.Blue(),
+      25,
+      25,
+    );
 
     this.bustMidPlane.setParent(this.debugElements);
     this.bustTopPlane.setParent(this.debugElements);
@@ -97,11 +122,12 @@ export class BodyManager implements IBodyManager {
       return false; // Height out of reasonable bounds
     }
 
-    this.debugElements?.scaling.scaleInPlace(newHeight / this.bodyHeight);
-
     try {
+      const scalevector = new Vector3(1, newHeight / this.bodyHeight, 1);
+      this.modelRoot.scaling.multiplyInPlace(scalevector);
+      this.debugElements?.scaling.multiplyInPlace(scalevector);
       this.bodyHeight = newHeight;
-      applyTargetHeight(this.modelRoot, newHeight, this.boundingBox);
+      this.boundingBox.max.y = this.bodyHeight;
     } catch (error) {
       console.error(`${LOG_TAG} Failed to update body height.`, error);
       return false; // Update failed
