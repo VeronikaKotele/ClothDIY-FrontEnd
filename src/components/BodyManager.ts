@@ -42,6 +42,8 @@ export class BodyManager implements IBodyManager {
     );
 
     this.makeTransparent();
+
+    this.modelRoot.addChild(this.debugElements.rootNode);
   }
 
   public async updateHeight(newHeight: number): Promise<boolean> {

@@ -64,7 +64,14 @@ export class DebugElements
         this.bustBottomPlane = this.drawCircumstance(bodyMeasurements.bustBottom, scene);
         this.waistPlane = this.drawCircumstance(bodyMeasurements.waist, scene);
         this.hipsPlane = this.drawCircumstance(bodyMeasurements.hips, scene);
-    }
+    
+        this.rootNode.addChild(this.boundingBoxLines);
+        this.rootNode.addChild(this.bustMidPlane);
+        this.rootNode.addChild(this.bustTopPlane);
+        this.rootNode.addChild(this.bustBottomPlane);
+        this.rootNode.addChild(this.waistPlane);
+        this.rootNode.addChild(this.hipsPlane);
+      }
 
     private drawBoundingBoxLines(
         boundingBox: { min: Vector3; max: Vector3 },
