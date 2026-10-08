@@ -104,59 +104,96 @@ export class DebugElements
         circumstance: Circumstance,
         scene: Scene): TransformNode
     {
-        const parentNode = new TransformNode("debugHorizontalPlaneParent", scene);
-        parentNode.parent = this.rootNode;
-        const planeInfo = circumstance.cuttingPlane;
+      const parentNode = new TransformNode("debugHorizontalPlaneParent", scene);
+      parentNode.parent = this.rootNode;
+      const planeInfo = circumstance.cuttingPlane;
 
-        // Transparent plane
-        const plane = MeshBuilder.CreatePlane("debugHorizontalPlane", { width: planeInfo.size.a, height: planeInfo.size.b }, scene);
-        plane.position = planeInfo.pivotPoint;
-        plane.rotation = new Vector3(Math.PI / 2, 0, 0); // ToDo: rotation to given plane normal, not just Up
-        plane.visibility = 0.3;
-        plane.parent = parentNode;
-        const planeMaterial = new StandardMaterial("debugHorizontalPlaneMaterial", scene);
-        planeMaterial.diffuseColor = planeInfo.color;
-        planeMaterial.emissiveColor = planeInfo.color;
-        planeMaterial.disableLighting = true;
-        planeMaterial.backFaceCulling = false;
-        plane.material = planeMaterial;
-        plane.isPickable = false;
+      // Transparent plane
+      const plane = MeshBuilder.CreatePlane(
+        "debugHorizontalPlane",
+        { width: planeInfo.size.a, height: planeInfo.size.b },
+        scene,
+      );
+      plane.position = planeInfo.pivotPoint;
+      plane.rotation = new Vector3(Math.PI / 2, 0, 0);
+      const cross = Vector3.Cross(Vector3.Up(), planeInfo.normal);
+      const angle = Vector3.GetAngleBetweenVectors(
+        Vector3.Up(),
+        planeInfo.normal,
+        cross,
+      );
+      if (angle > 0.001) {
+        // ToDo: Apply rotation to the plane based on the calculated angle and cross vector
+        plane.rotate(cross, angle);
+      }
+      plane.visibility = 0.3;
+      plane.parent = parentNode;
+      const planeMaterial = new StandardMaterial(
+        "debugHorizontalPlaneMaterial",
+        scene,
+      );
+      planeMaterial.diffuseColor = planeInfo.color;
+      planeMaterial.emissiveColor = planeInfo.color;
+      planeMaterial.disableLighting = true;
+      planeMaterial.backFaceCulling = false;
+      plane.material = planeMaterial;
+      plane.isPickable = false;
 
-        // Intersection segments lines
-        const segmentsLines = MeshBuilder.CreateLineSystem(
+      // Intersection segments lines
+      const segmentsLines = MeshBuilder.CreateLineSystem(
         "segmentsLines",
         {
-            lines: [
+          lines: [
             ...circumstance.segments,
             ...circumstance.segments.map(([start, end]) => {
-                const reversedStart = new Vector3(-start.x, start.y, start.z);
-                const reversedEnd = new Vector3(-end.x, end.y, end.z);
-                return [reversedStart, reversedEnd];
+              const reversedStart = new Vector3(-start.x, start.y, start.z);
+              const reversedEnd = new Vector3(-end.x, end.y, end.z);
+              return [reversedStart, reversedEnd];
             }),
-            ], // Add reversed segments to make lines visible from both sides
+          ], // Add reversed segments to make lines visible from both sides
         },
         scene,
-        );
-        segmentsLines.color = planeInfo.color;
-        segmentsLines.parent = parentNode;
+      );
+      segmentsLines.color = planeInfo.color;
+      segmentsLines.parent = parentNode;
 
-        const labelText = MeshBuilder.CreatePlane("debugHorizontalPlaneLabel", { width: 30, height: 10 }, scene);
-        labelText.position = new Vector3(15, planeInfo.pivotPoint.y + 5, -15);
-        labelText.billboardMode = 7; // Make the label always face the camera
-        labelText.parent = parentNode;
+      const labelText = MeshBuilder.CreatePlane(
+        "debugHorizontalPlaneLabel",
+        { width: 30, height: 10 },
+        scene,
+      );
+      labelText.position = new Vector3(15, planeInfo.pivotPoint.y + 5, -15);
+      labelText.billboardMode = 7; // Make the label always face the camera
+      labelText.parent = parentNode;
 
-        const labelTexture = new DynamicTexture("debugHorizontalPlaneLabelTexture", { width: 400, height: 100 }, scene, true);
-        labelTexture.hasAlpha = true;
-        labelTexture.drawText(`${circumstance.circumference.toFixed(1)} см`, null, 100, "bold 26px Arial", "white", "transparent", true);
+      const labelTexture = new DynamicTexture(
+        "debugHorizontalPlaneLabelTexture",
+        { width: 400, height: 100 },
+        scene,
+        true,
+      );
+      labelTexture.hasAlpha = true;
+      labelTexture.drawText(
+        `${circumstance.circumference.toFixed(1)} см`,
+        null,
+        100,
+        "bold 26px Arial",
+        "white",
+        "transparent",
+        true,
+      );
 
-        const labelMaterial = new StandardMaterial("debugHorizontalPlaneLabelMaterial", scene);
-        labelMaterial.diffuseTexture = labelTexture;
-        labelMaterial.emissiveColor = planeInfo.color;
-        labelMaterial.disableLighting = true;
-        labelMaterial.backFaceCulling = false;
+      const labelMaterial = new StandardMaterial(
+        "debugHorizontalPlaneLabelMaterial",
+        scene,
+      );
+      labelMaterial.diffuseTexture = labelTexture;
+      labelMaterial.emissiveColor = planeInfo.color;
+      labelMaterial.disableLighting = true;
+      labelMaterial.backFaceCulling = false;
 
-        labelText.material = labelMaterial;
+      labelText.material = labelMaterial;
 
-        return parentNode;
+      return parentNode;
     }
 };

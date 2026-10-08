@@ -20,9 +20,7 @@ const PLANE_INTERSECTION_EPSILON = 1e-5;
  */
 export function computeHorizontalPlaneIntersectionSegments(
   mesh: Mesh,
-  planeHeightY: number,
-  xSize: number,
-  zSize: number,
+  plane: Plane,
 ): Segments {
   const positions = mesh.getVerticesData(VertexBuffer.PositionKind);
   const indices = mesh.getIndices();
@@ -40,7 +38,7 @@ export function computeHorizontalPlaneIntersectionSegments(
   mesh.computeWorldMatrix(true);
   const worldMatrix = mesh.getWorldMatrix();
 
-  const segments: [Vector3, Vector3][] = [];
+  const segments: Segments = [];
 
   for (let i = 0; i + 2 < indices.length; i += 3) {
     const v0 = getWorldVertex(positions, indices[i], worldMatrix);
@@ -51,9 +49,7 @@ export function computeHorizontalPlaneIntersectionSegments(
       v0,
       v1,
       v2,
-      planeHeightY,
-      xSize,
-      zSize,
+      plane,
     );
     if (segment) {
       segments.push(segment);
@@ -221,18 +217,20 @@ function getWorldVertex(
   return Vector3.TransformCoordinates(localPosition, worldMatrix);
 }
 
-// Returns the two points where a triangle's edges cross the plane y = planeY, or null if the
+// Returns the two points where a triangle's edges cross the plane, or null if the
 // triangle does not cross the plane (fully above/below it, or only touches it at one vertex).
 function getTrianglePlaneIntersectionSegment(
   v0: Vector3,
   v1: Vector3,
   v2: Vector3,
-  planeY: number,
-  xSize: number,
-  zSize: number,
+  plane: Plane,
 ): [Vector3, Vector3] | null {
+  const xMin = plane.pivotPoint.x - plane.size.a / 2;
+  const xMax = plane.pivotPoint.x + plane.size.a / 2;
+  const zMin = plane.pivotPoint.z - plane.size.b / 2;
+  const zMax = plane.pivotPoint.z + plane.size.b / 2;
   for (const v of [v0, v1, v2]) {
-    if (!isWithinXZBounds(v, xSize / 2, zSize / 2)) {
+    if (!isWithinXZBounds(v, xMin, zMin, xMax, zMax)) {
       return null;
     }
   }
@@ -245,17 +243,28 @@ function getTrianglePlaneIntersectionSegment(
   const points: Vector3[] = [];
 
   for (const [a, b] of edges) {
-    const da = a.y - planeY;
-    const db = b.y - planeY;
-
-    if (Math.abs(da) < PLANE_INTERSECTION_EPSILON) {
-      addUniqueIntersectionPoint(points, a);
+    try {
+      const edgeV = b.subtract(a);
+      const da = plane.pivotPoint.subtract(a);
+      const dotnV = Vector3.Dot(plane.normal, edgeV);
+      if (Math.abs(dotnV) < PLANE_INTERSECTION_EPSILON) {
+        continue; // Edge is parallel to the plane, skip it.
+      }
+      const t = Vector3.Dot(plane.normal, da) / dotnV;
+      if (Math.abs(t) < PLANE_INTERSECTION_EPSILON) {
+        addUniqueIntersectionPoint(points, a);
+      }
+      else if (Math.abs(t - 1) < PLANE_INTERSECTION_EPSILON) {
+        addUniqueIntersectionPoint(points, b);
+      }
+      else if (t < 0 || t > 1) {
+        continue; // Intersection is outside the edge segment, skip it.
+      }
+      const intersectionPoint = a.add(edgeV.scale(t));
+      addUniqueIntersectionPoint(points, intersectionPoint);
     }
-
-    // Opposite signs means the plane crosses this edge somewhere in between.
-    if ((da > 0 && db < 0) || (da < 0 && db > 0)) {
-      const t = da / (da - db);
-      addUniqueIntersectionPoint(points, Vector3.Lerp(a, b, t));
+    catch (error) {
+      console.error("Error computing intersection for edge:", a, b, error);
     }
   }
 
@@ -268,9 +277,9 @@ function getTrianglePlaneIntersectionSegment(
   return [points[0], points[1]];
 }
 
-function isWithinXZBounds(point: Vector3, xMax: number, yMax: number): boolean {
+function isWithinXZBounds(point: Vector3, xMin: number, yMin: number, xMax: number, yMax: number): boolean {
   return (
-    point.x >= -xMax && point.x <= xMax && point.z >= -yMax && point.z <= yMax
+    point.x >= xMin && point.x <= xMax && point.z >= yMin && point.z <= yMax
   );
 }
 
@@ -294,9 +303,7 @@ export function calculateCircumstance(
 ): Circumstance {
   const segments: Segments = computeHorizontalPlaneIntersectionSegments(
     halfModel,
-    plane.pivotPoint.y,
-    plane.size.a,
-    plane.size.b,
+    plane
   );
 
   removeMedianCavitations(segments);

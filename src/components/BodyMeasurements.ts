@@ -30,7 +30,7 @@ export class BodyMeasurements {
     });
     this.bustTop = calculateCircumstance(rightBodyPartMesh, {
         pivotPoint: new Vector3(0, Constants.MODEL_LOAD_BUST_TOP_LINE_REL_HEIGHT * bodyHeight, 0), 
-        normal: Vector3.Up(), 
+        normal: new Vector3(0, 1, 0.2), 
         color: Color3.Red(), 
         size: { a: 25, b: 25 } 
     });
@@ -44,7 +44,7 @@ export class BodyMeasurements {
         pivotPoint: new Vector3(0, Constants.MODEL_LOAD_WEIST_TO_HEIGHT_RATIO * bodyHeight, 0), 
         normal: Vector3.Up(), 
         color: Color3.Green(), 
-        size: { a: 20, b: 20 } 
+        size: { a: 22, b: 22 } 
     });
     this.hips = calculateCircumstance(rightBodyPartMesh, {
         pivotPoint: new Vector3(0, Constants.MODEL_LOAD_HIPS_TO_HEIGHT_RATIO * bodyHeight, 0), 
